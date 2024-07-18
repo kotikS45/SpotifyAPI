@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using SpotifyAPI.Services.Interfaces;
+using SpotifyAPI.Models.Artist;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Model.Context;
-using SpotifyAPI.Models.Artist;
 
 namespace SpotifyAPI.Controllers;
 
@@ -11,7 +13,9 @@ namespace SpotifyAPI.Controllers;
 [ApiController]
 public class ArtistsController(
     DataContext context,
-    IMapper mapper
+    IMapper mapper,
+    IValidator<ArtistCreateVm> createValidator,
+    IArtistsControllerService service
     ) : ControllerBase
 {
     [HttpGet]
@@ -22,5 +26,20 @@ public class ArtistsController(
             .ToArrayAsync();
 
         return Ok(artists);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Create([FromForm] ArtistCreateVm vm)
+    {
+        var validationResult = await createValidator.ValidateAsync(vm);
+
+        if (!validationResult.IsValid)
+        {
+            return BadRequest(validationResult.Errors);
+        }
+
+        await service.CreateAsync(vm);
+
+        return Ok();
     }
 }

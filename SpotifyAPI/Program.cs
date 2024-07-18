@@ -1,7 +1,11 @@
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Model.Context;
 using SpotifyAPI.Mapper;
 using SpotifyAPI.Services;
+using SpotifyAPI.Services.Interfaces;
+using SpotifyAPI.Validators.Artist;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +32,12 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddAutoMapper(typeof(AppMapProfile));
+builder.Services.AddValidatorsFromAssemblyContaining<ArtistCreateValidator>();
+
+builder.Services.AddTransient<IImageService, ImageService>();
+builder.Services.AddTransient<IImageValidator, ImageValidator>();
+builder.Services.AddTransient<IArtistsControllerService, ArtistsControllerService>();
+
 
 var app = builder.Build();
 
@@ -38,6 +48,21 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// Images
+string imagesDirPath = app.Services.GetRequiredService<IImageService>().ImagesDir;
+
+if (!Directory.Exists(imagesDirPath))
+{
+    Directory.CreateDirectory(imagesDirPath);
+}
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(imagesDirPath),
+    RequestPath = "/images"
+});
+
+// Cors
 app.UseCors(
     configuration => configuration
         .AllowAnyOrigin()
