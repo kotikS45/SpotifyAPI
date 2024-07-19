@@ -6,6 +6,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Model.Context;
+using SpotifyAPI.Models.Pagination;
 
 namespace SpotifyAPI.Controllers;
 
@@ -16,7 +17,8 @@ public class ArtistsController(
     IMapper mapper,
     IValidator<ArtistCreateVm> createValidator,
     IValidator<ArtistUpdateVm> updateValidator,
-    IArtistsControllerService service
+    IArtistsControllerService service,
+    IPaginationService<ArtistVm, ArtistFilterVm> pagination
     ) : ControllerBase
 {
     [HttpGet]
@@ -25,6 +27,32 @@ public class ArtistsController(
         var artists = await context.Artists
             .ProjectTo<ArtistVm>(mapper.ConfigurationProvider)
             .ToArrayAsync();
+
+        return Ok(artists);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetPage([FromQuery] ArtistFilterVm vm)
+    {
+        try
+        {
+            return Ok(await pagination.GetPageAsync(vm));
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(long id)
+    {
+        var artists = await context.Artists
+            .ProjectTo<ArtistVm>(mapper.ConfigurationProvider)
+            .FirstOrDefaultAsync(c => c.Id == id);
+
+        if (artists is null)
+            return NotFound();
 
         return Ok(artists);
     }

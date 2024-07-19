@@ -3,8 +3,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Model.Context;
 using SpotifyAPI.Mapper;
+using SpotifyAPI.Models.Artist;
 using SpotifyAPI.Services;
 using SpotifyAPI.Services.Interfaces;
+using SpotifyAPI.Services.Pagination;
 using SpotifyAPI.Validators.Artist;
 using System.Data;
 
@@ -46,6 +48,8 @@ builder.Services.AddTransient<IAudioValidator, AudioValidator>();
 builder.Services.AddTransient<IExistingEntityCheckerService, ExistingEntityCheckerService>();
 
 builder.Services.AddTransient<IArtistsControllerService, ArtistsControllerService>();
+builder.Services.AddTransient<IPaginationService<ArtistVm, ArtistFilterVm>, ArtistPaginationService>();
+
 builder.Services.AddTransient<IAlbumsCotrollerService, AlbumsControllerService>();
 builder.Services.AddTransient<ITrackControllerService, TracksControllerService>();
 
