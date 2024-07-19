@@ -6,4 +6,5 @@ namespace SpotifyAPI.Services.Interfaces;
 public interface IArtistsControllerService
 {
     Task CreateAsync(ArtistCreateVm vm);
+    Task DeleteIfExistsAsync(long id);
 }
