@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Model.Context;
 using SpotifyAPI.Mapper;
+using SpotifyAPI.Models.Album;
 using SpotifyAPI.Models.Artist;
 using SpotifyAPI.Services;
 using SpotifyAPI.Services.Interfaces;
@@ -51,6 +52,8 @@ builder.Services.AddTransient<IArtistsControllerService, ArtistsControllerServic
 builder.Services.AddTransient<IPaginationService<ArtistVm, ArtistFilterVm>, ArtistPaginationService>();
 
 builder.Services.AddTransient<IAlbumsCotrollerService, AlbumsControllerService>();
+builder.Services.AddTransient<IPaginationService<AlbumVm, AlbumFilterVm>, AlbumPaginationService>();
+
 builder.Services.AddTransient<ITrackControllerService, TracksControllerService>();
 
 
