@@ -5,4 +5,5 @@ namespace SpotifyAPI.Services.Interfaces;
 public interface IAlbumsCotrollerService
 {
     Task CreateAsync(AlbumCreateVm vm);
+    Task UpdateAsync(AlbumUpdateVm vm);
 }

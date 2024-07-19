@@ -15,6 +15,7 @@ public class AlbumsController(
     DataContext context,
     IMapper mapper,
     IValidator<AlbumCreateVm> createValidator,
+    IValidator<AlbumUpdateVm> updateValidator,
     IAlbumsCotrollerService service
     ) : ControllerBase
 {
@@ -39,6 +40,21 @@ public class AlbumsController(
         }
 
         await service.CreateAsync(vm);
+
+        return Ok();
+    }
+
+    [HttpPut]
+    public async Task<IActionResult> Update([FromForm] AlbumUpdateVm vm)
+    {
+        var validationResult = await updateValidator.ValidateAsync(vm);
+
+        if (!validationResult.IsValid)
+        {
+            return BadRequest(validationResult.Errors);
+        }
+
+        await service.UpdateAsync(vm);
 
         return Ok();
     }

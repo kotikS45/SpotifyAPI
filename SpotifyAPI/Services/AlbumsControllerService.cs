@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using Model.Context;
 using Model.Entities;
 using SpotifyAPI.Models.Album;
@@ -21,6 +22,29 @@ public class AlbumsControllerService(
         try
         {
             await context.SaveChangesAsync();
+        }
+        catch (Exception)
+        {
+            imageService.DeleteImageIfExists(album.Image);
+            throw;
+        }
+    }
+
+    public async Task UpdateAsync(AlbumUpdateVm vm)
+    {
+        var album = await context.Albums.FirstAsync(c => c.Id == vm.Id);
+
+        string oldImage = album.Image;
+
+        album.Name = vm.Name;
+        album.Image = await imageService.SaveImageAsync(vm.Image);
+        album.ArtistId = vm.ArtistId;
+
+        try
+        {
+            await context.SaveChangesAsync();
+
+            imageService.DeleteImageIfExists(oldImage);
         }
         catch (Exception)
         {
