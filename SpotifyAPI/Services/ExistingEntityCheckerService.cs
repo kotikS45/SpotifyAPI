@@ -13,4 +13,7 @@ public class ExistingEntityCheckerService(
 
     public async Task<bool> IsCorrectAlbumId(long id, CancellationToken cancellationToken) =>
         await context.Albums.AnyAsync(a => a.Id == id, cancellationToken);
+
+    public async Task<bool> IsCorrectTrackId(long id, CancellationToken cancellationToken) =>
+        await context.Tracks.AnyAsync(a => a.Id == id, cancellationToken);
 }

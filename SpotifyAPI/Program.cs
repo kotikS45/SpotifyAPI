@@ -37,20 +37,24 @@ builder.Services.AddValidatorsFromAssemblyContaining<ArtistCreateValidator>();
 builder.Services.AddTransient<IImageService, ImageService>();
 builder.Services.AddTransient<IImageValidator, ImageValidator>();
 
+builder.Services.AddTransient<IAudioService, AudioService>();
+builder.Services.AddTransient<IAudioValidator, AudioValidator>();
+
 builder.Services.AddTransient<IExistingEntityCheckerService, ExistingEntityCheckerService>();
 
 builder.Services.AddTransient<IArtistsControllerService, ArtistsControllerService>();
 builder.Services.AddTransient<IAlbumsCotrollerService, AlbumsControllerService>();
+builder.Services.AddTransient<ITrackControllerService, TracksControllerService>();
 
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
+//if (app.Environment.IsDevelopment())
+//{
     app.UseSwagger();
     app.UseSwaggerUI();
-}
+//}
 
 // Images
 string imagesDirPath = app.Services.GetRequiredService<IImageService>().ImagesDir;
@@ -64,6 +68,20 @@ app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(imagesDirPath),
     RequestPath = "/images"
+});
+
+// Audio
+string audioDirPath = app.Services.GetRequiredService<IAudioService>().AudioDir;
+
+if (!Directory.Exists(audioDirPath))
+{
+    Directory.CreateDirectory(audioDirPath);
+}
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(audioDirPath),
+    RequestPath = "/audio"
 });
 
 // Cors

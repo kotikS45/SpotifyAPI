@@ -19,5 +19,8 @@ public class AppMapProfile : Profile
             .ForMember(c => c.Image, opt => opt.Ignore());
 
         CreateMap<Track, TrackVm>();
+        CreateMap<TrackCreateVm, Track>()
+            .ForMember(c => c.Path, opt => opt.Ignore())
+            .ForMember(C => C.Duration, opt => opt.Ignore());
     }
 }
