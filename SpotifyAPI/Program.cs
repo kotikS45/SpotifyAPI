@@ -11,6 +11,8 @@ using SpotifyAPI.Mapper;
 using SpotifyAPI.Models.Album;
 using SpotifyAPI.Models.Artist;
 using SpotifyAPI.Models.Track;
+using SpotifyAPI.Seeder;
+using SpotifyAPI.Seeder.Interfaces;
 using SpotifyAPI.Services;
 using SpotifyAPI.Services.Interfaces;
 using SpotifyAPI.Services.Pagination;
@@ -106,6 +108,9 @@ builder.Services.AddAutoMapper(typeof(AppMapProfile));
 builder.Services.AddValidatorsFromAssemblyContaining<ArtistCreateValidator>();
 
 builder.Services.AddScoped<IMigrationService, MigrationService>();
+builder.Services.AddScoped<IIdentitySeeder, IdentitySeeder>();
+
+builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 
 builder.Services.AddTransient<IImageService, ImageService>();
 builder.Services.AddTransient<IImageValidator, ImageValidator>();
@@ -114,6 +119,8 @@ builder.Services.AddTransient<IAudioService, AudioService>();
 builder.Services.AddTransient<IAudioValidator, AudioValidator>();
 
 builder.Services.AddTransient<IExistingEntityCheckerService, ExistingEntityCheckerService>();
+
+builder.Services.AddTransient<IAccountsControllerService, AccountsControllerService>();
 
 builder.Services.AddTransient<IArtistsControllerService, ArtistsControllerService>();
 builder.Services.AddTransient<IPaginationService<ArtistVm, ArtistFilterVm>, ArtistPaginationService>();
@@ -177,6 +184,7 @@ app.MapControllers();
 await using (var scope = app.Services.GetRequiredService<IServiceScopeFactory>().CreateAsyncScope())
 {
     await scope.ServiceProvider.GetRequiredService<IMigrationService>().MigrateLatestAsync();
+    await scope.ServiceProvider.GetRequiredService<IIdentitySeeder>().SeedAsync();
 }
 
 app.Run();

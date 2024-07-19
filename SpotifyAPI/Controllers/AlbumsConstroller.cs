@@ -5,8 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Model.Context;
 using SpotifyAPI.Models.Album;
-using SpotifyAPI.Models.Artist;
-using SpotifyAPI.Models.Pagination;
 using SpotifyAPI.Services.Interfaces;
 
 namespace SpotifyAPI.Controllers;
