@@ -2,7 +2,7 @@
 
 public class TrackVm
 {
-    public long id { get; set; }
+    public long Id { get; set; }
     public int Duration { get; set; }
     public long AlbumId { get; set; }
     public string Name { get; set; } = null!;

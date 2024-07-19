@@ -16,7 +16,8 @@ public class TracksController(
     IMapper mapper,
     IValidator<TrackCreateVm> createValidator,
     IValidator<TrackUpdateVm> updateValidator,
-    ITrackControllerService service
+    ITrackControllerService service,
+    IPaginationService<TrackVm, TrackFilterVm> pagination
     ) : ControllerBase 
 {
 
@@ -26,6 +27,32 @@ public class TracksController(
         var tracks = await context.Tracks
             .ProjectTo<TrackVm>(mapper.ConfigurationProvider)
             .ToArrayAsync();
+
+        return Ok(tracks);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetPage([FromQuery] TrackFilterVm vm)
+    {
+        try
+        {
+            return Ok(await pagination.GetPageAsync(vm));
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(long id)
+    {
+        var tracks = await context.Tracks
+            .ProjectTo<TrackVm>(mapper.ConfigurationProvider)
+            .FirstOrDefaultAsync(c => c.Id == id);
+
+        if (tracks is null)
+            return NotFound();
 
         return Ok(tracks);
     }

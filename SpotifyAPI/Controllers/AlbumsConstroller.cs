@@ -48,14 +48,14 @@ public class AlbumsController(
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(long id)
     {
-        var artists = await context.Albums
+        var albums = await context.Albums
             .ProjectTo<AlbumVm>(mapper.ConfigurationProvider)
             .FirstOrDefaultAsync(c => c.Id == id);
 
-        if (artists is null)
+        if (albums is null)
             return NotFound();
 
-        return Ok(artists);
+        return Ok(albums);
     }
 
     [HttpPost]

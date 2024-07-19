@@ -5,6 +5,7 @@ using Model.Context;
 using SpotifyAPI.Mapper;
 using SpotifyAPI.Models.Album;
 using SpotifyAPI.Models.Artist;
+using SpotifyAPI.Models.Track;
 using SpotifyAPI.Services;
 using SpotifyAPI.Services.Interfaces;
 using SpotifyAPI.Services.Pagination;
@@ -55,6 +56,7 @@ builder.Services.AddTransient<IAlbumsCotrollerService, AlbumsControllerService>(
 builder.Services.AddTransient<IPaginationService<AlbumVm, AlbumFilterVm>, AlbumPaginationService>();
 
 builder.Services.AddTransient<ITrackControllerService, TracksControllerService>();
+builder.Services.AddTransient<IPaginationService<TrackVm, TrackFilterVm>, TrackPaginationService>();
 
 
 var app = builder.Build();
