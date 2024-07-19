@@ -40,6 +40,7 @@ builder.Services.AddTransient<IImageValidator, ImageValidator>();
 builder.Services.AddTransient<IExistingEntityCheckerService, ExistingEntityCheckerService>();
 
 builder.Services.AddTransient<IArtistsControllerService, ArtistsControllerService>();
+builder.Services.AddTransient<IAlbumsCotrollerService, AlbumsControllerService>();
 
 
 var app = builder.Build();

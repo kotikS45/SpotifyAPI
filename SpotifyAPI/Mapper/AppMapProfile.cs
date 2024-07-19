@@ -14,5 +14,7 @@ public class AppMapProfile : Profile
             .ForMember(c => c.Image, opt => opt.Ignore());
 
         CreateMap<Album, AlbumVm>();
+        CreateMap<AlbumCreateVm, Album>()
+            .ForMember(c => c.Image, opt => opt.Ignore());
     }
 }
