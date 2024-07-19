@@ -6,6 +6,7 @@ using SpotifyAPI.Mapper;
 using SpotifyAPI.Services;
 using SpotifyAPI.Services.Interfaces;
 using SpotifyAPI.Validators.Artist;
+using System.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +34,8 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddAutoMapper(typeof(AppMapProfile));
 builder.Services.AddValidatorsFromAssemblyContaining<ArtistCreateValidator>();
+
+builder.Services.AddScoped<IMigrationService, MigrationService>();
 
 builder.Services.AddTransient<IImageService, ImageService>();
 builder.Services.AddTransient<IImageValidator, ImageValidator>();
@@ -95,5 +98,10 @@ app.UseCors(
 app.UseAuthorization();
 
 app.MapControllers();
+
+await using (var scope = app.Services.GetRequiredService<IServiceScopeFactory>().CreateAsyncScope())
+{
+    await scope.ServiceProvider.GetRequiredService<IMigrationService>().MigrateLatestAsync();
+}
 
 app.Run();
