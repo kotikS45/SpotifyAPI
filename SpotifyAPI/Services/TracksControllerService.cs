@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using Model.Context;
 using Model.Entities;
-using SpotifyAPI.Models.Album;
 using SpotifyAPI.Models.Track;
 using SpotifyAPI.Services.Interfaces;
 
@@ -55,5 +54,18 @@ public class TracksControllerService(
             audioService.DeleteAudioIfExists(track.Path);
             throw;
         }
+    }
+
+    public async Task DeleteIfExistsAsync(long id)
+    {
+        var track = await context.Tracks.FirstOrDefaultAsync(c => c.Id == id);
+
+        if (track is null)
+            return;
+
+        context.Tracks.Remove(track);
+        await context.SaveChangesAsync();
+
+        audioService.DeleteAudioIfExists(track.Path);
     }
 }

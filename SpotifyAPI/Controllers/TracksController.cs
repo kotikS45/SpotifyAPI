@@ -59,4 +59,11 @@ public class TracksController(
 
         return Ok();
     }
+
+    [HttpDelete("id")]
+    public async Task<IActionResult> Delete(long id)
+    {
+        await service.DeleteIfExistsAsync(id);
+        return Ok();
+    }
 }
