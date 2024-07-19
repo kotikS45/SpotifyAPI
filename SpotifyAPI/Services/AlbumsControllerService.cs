@@ -52,4 +52,17 @@ public class AlbumsControllerService(
             throw;
         }
     }
+
+    public async Task DeleteIfExistsAsync(long id)
+    {
+        var album = await context.Albums.FirstOrDefaultAsync(c => c.Id == id);
+
+        if (album is null)
+            return;
+
+        context.Albums.Remove(album);
+        await context.SaveChangesAsync();
+
+        imageService.DeleteImageIfExists(album.Image);
+    }
 }

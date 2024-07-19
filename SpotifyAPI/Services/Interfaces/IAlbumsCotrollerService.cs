@@ -6,4 +6,5 @@ public interface IAlbumsCotrollerService
 {
     Task CreateAsync(AlbumCreateVm vm);
     Task UpdateAsync(AlbumUpdateVm vm);
+    Task DeleteIfExistsAsync(long id);
 }
