@@ -15,6 +15,7 @@ public class ArtistsController(
     DataContext context,
     IMapper mapper,
     IValidator<ArtistCreateVm> createValidator,
+    IValidator<ArtistUpdateVm> updateValidator,
     IArtistsControllerService service
     ) : ControllerBase
 {
@@ -39,6 +40,21 @@ public class ArtistsController(
         }
 
         await service.CreateAsync(vm);
+
+        return Ok();
+    }
+
+    [HttpPut]
+    public async Task<IActionResult> Update([FromForm] ArtistUpdateVm vm)
+    {
+        var validationResult = await updateValidator.ValidateAsync(vm);
+
+        if (!validationResult.IsValid)
+        {
+            return BadRequest(validationResult.Errors);
+        }
+
+        await service.UpdateAsync(vm);
 
         return Ok();
     }

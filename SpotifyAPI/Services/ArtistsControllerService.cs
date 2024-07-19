@@ -31,6 +31,29 @@ public class ArtistsControllerService(
         }
     }
 
+    public async Task UpdateAsync(ArtistUpdateVm vm)
+    {
+        var artist = await context.Artists.FirstAsync(a => a.Id == vm.Id);
+
+        string oldImage = artist.Image;
+
+        artist.Name = vm.Name;
+        artist.Genre = vm.Genre;
+        artist.Image = await imageService.SaveImageAsync(vm.Image);
+
+        try
+        {
+            await context.SaveChangesAsync();
+
+            imageService.DeleteImageIfExists(oldImage);
+        }
+        catch (Exception)
+        {
+            imageService.DeleteImageIfExists(artist.Image);
+            throw;
+        }
+    }
+
     public async Task DeleteIfExistsAsync(long id)
     {
         var artist = await context.Artists.FirstOrDefaultAsync(a => a.Id == id);

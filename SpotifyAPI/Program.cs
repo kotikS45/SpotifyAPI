@@ -36,6 +36,9 @@ builder.Services.AddValidatorsFromAssemblyContaining<ArtistCreateValidator>();
 
 builder.Services.AddTransient<IImageService, ImageService>();
 builder.Services.AddTransient<IImageValidator, ImageValidator>();
+
+builder.Services.AddTransient<IExistingEntityCheckerService, ExistingEntityCheckerService>();
+
 builder.Services.AddTransient<IArtistsControllerService, ArtistsControllerService>();
 
 
