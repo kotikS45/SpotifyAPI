@@ -17,7 +17,6 @@ using SpotifyAPI.Services;
 using SpotifyAPI.Services.Interfaces;
 using SpotifyAPI.Services.Pagination;
 using SpotifyAPI.Validators.Artist;
-using System.Data;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
