@@ -1,10 +1,10 @@
 ﻿using FluentValidation;
-using SpotifyAPI.Models.Artist;
+using SpotifyAPI.Models.Playlist;
 using SpotifyAPI.Services.Interfaces;
 
-namespace SpotifyAPI.Validators.Artist;
+namespace SpotifyAPI.Validators.Playlist;
 
-public class PlaylistCreateValidator : AbstractValidator<ArtistCreateVm>
+public class PlaylistCreateValidator : AbstractValidator<PlaylistCreateVm>
 {
     public PlaylistCreateValidator(IImageValidator imageValidator)
     {
@@ -13,12 +13,6 @@ public class PlaylistCreateValidator : AbstractValidator<ArtistCreateVm>
                 .WithMessage("Name is empty or null")
             .MaximumLength(255)
                 .WithMessage("Name is too long");
-
-        RuleFor(c => c.Genre)
-            .NotEmpty()
-                .WithMessage("Genre is empty or null")
-            .MaximumLength(255)
-                .WithMessage("Genre is too long");
 
         RuleFor(c => c.Image)
             .NotNull()

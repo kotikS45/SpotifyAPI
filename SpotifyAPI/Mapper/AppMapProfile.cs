@@ -4,6 +4,7 @@ using Model.Entities.Identity;
 using SpotifyAPI.Models.Album;
 using SpotifyAPI.Models.Artist;
 using SpotifyAPI.Models.Identity;
+using SpotifyAPI.Models.Playlist;
 using SpotifyAPI.Models.Track;
 
 namespace SpotifyAPI.Mapper;
@@ -27,5 +28,9 @@ public class AppMapProfile : Profile
         CreateMap<TrackCreateVm, Track>()
             .ForMember(c => c.Path, opt => opt.Ignore())
             .ForMember(C => C.Duration, opt => opt.Ignore());
+
+        CreateMap<Playlist, PlaylistVm>();
+        CreateMap<PlaylistCreateVm, Playlist>()
+            .ForMember(c => c.Image, opt => opt.Ignore());
     }
 }

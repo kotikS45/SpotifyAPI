@@ -10,6 +10,7 @@ using Model.Entities.Identity;
 using SpotifyAPI.Mapper;
 using SpotifyAPI.Models.Album;
 using SpotifyAPI.Models.Artist;
+using SpotifyAPI.Models.Playlist;
 using SpotifyAPI.Models.Track;
 using SpotifyAPI.Seeder;
 using SpotifyAPI.Seeder.Interfaces;
@@ -104,7 +105,7 @@ builder.Services.AddSwaggerGen(options => {
 });
 
 builder.Services.AddAutoMapper(typeof(AppMapProfile));
-builder.Services.AddValidatorsFromAssemblyContaining<ArtistCreateValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<PlaylistCreateValidator>();
 
 builder.Services.AddScoped<IMigrationService, MigrationService>();
 builder.Services.AddScoped<IIdentitySeeder, IdentitySeeder>();
@@ -113,6 +114,9 @@ builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 
 builder.Services.AddTransient<IImageService, ImageService>();
 builder.Services.AddTransient<IImageValidator, ImageValidator>();
+
+builder.Services.AddTransient<IIdentityService, IdentityService>();
+builder.Services.AddScoped<IScopedIdentityService, ScopedIdentityService>();
 
 builder.Services.AddTransient<IAudioService, AudioService>();
 builder.Services.AddTransient<IAudioValidator, AudioValidator>();
@@ -129,6 +133,9 @@ builder.Services.AddTransient<IPaginationService<AlbumVm, AlbumFilterVm>, AlbumP
 
 builder.Services.AddTransient<ITrackControllerService, TracksControllerService>();
 builder.Services.AddTransient<IPaginationService<TrackVm, TrackFilterVm>, TrackPaginationService>();
+
+builder.Services.AddTransient<IPlaylistControllerService, PlaylistsControllerService>();
+builder.Services.AddTransient<IPaginationService<PlaylistVm, PlaylistFilterVm>, PlaylistPaginationService>();
 
 
 var app = builder.Build();
