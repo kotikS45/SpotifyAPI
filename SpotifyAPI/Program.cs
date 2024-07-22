@@ -10,6 +10,7 @@ using Model.Entities.Identity;
 using SpotifyAPI.Mapper;
 using SpotifyAPI.Models.Album;
 using SpotifyAPI.Models.Artist;
+using SpotifyAPI.Models.Follower;
 using SpotifyAPI.Models.Playlist;
 using SpotifyAPI.Models.PlaylistTrack;
 using SpotifyAPI.Models.Track;
@@ -141,6 +142,8 @@ builder.Services.AddTransient<IPaginationService<PlaylistVm, PlaylistFilterVm>, 
 builder.Services.AddTransient<IPlaylistTrackControllerService, PlaylistTrackControllerService>();
 builder.Services.AddTransient<IPaginationService<TrackVm, PlaylistTrackFilterVm>, PlaylistTracksPaginationService>();
 
+builder.Services.AddTransient<IFollowerControllerService, FollowerControllerService>();
+builder.Services.AddTransient<IPaginationService<ArtistVm, FollowerFilterVm>, FollowerPaginationService>();
 
 var app = builder.Build();
 

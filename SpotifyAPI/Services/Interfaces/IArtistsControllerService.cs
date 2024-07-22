@@ -1,5 +1,4 @@
-﻿using Model.Entities;
-using SpotifyAPI.Models.Artist;
+﻿using SpotifyAPI.Models.Artist;
 
 namespace SpotifyAPI.Services.Interfaces;
 
