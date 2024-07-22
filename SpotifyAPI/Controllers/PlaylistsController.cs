@@ -19,8 +19,7 @@ public class PlaylistsController(
     IValidator<PlaylistUpdateVm> updateValidator,
     IPlaylistControllerService service,
     IIdentityService identityService,
-    IPaginationService<PlaylistVm, PlaylistFilterVm> pagination,
-    IScopedIdentityService scopedIdentityService
+    IPaginationService<PlaylistVm, PlaylistFilterVm> pagination
     ) : ControllerBase
 {
     [HttpGet]
@@ -37,8 +36,6 @@ public class PlaylistsController(
     [Authorize(Roles = "Admin,User")]
     public async Task<IActionResult> GetPage([FromQuery] PlaylistFilterVm vm)
     {
-        await scopedIdentityService.InitCurrentUserAsync(this);
-
         try
         {
             return Ok(await pagination.GetPageAsync(vm));
