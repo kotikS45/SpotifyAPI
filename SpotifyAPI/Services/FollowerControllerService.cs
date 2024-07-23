@@ -26,7 +26,7 @@ public class FollowerControllerService(
         var follower = await context.Followers
             .FirstOrDefaultAsync(f => f.UserId == userId && f.ArtistId == vm.ArtistId);
 
-        if (follower == null)
+        if (follower is null)
             return;
 
         context.Followers.Remove(follower);

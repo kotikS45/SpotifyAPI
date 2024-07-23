@@ -5,21 +5,21 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Model.Context;
-using SpotifyAPI.Models.Artist;
-using SpotifyAPI.Models.Follower;
+using SpotifyAPI.Models.Like;
+using SpotifyAPI.Models.Track;
 using SpotifyAPI.Services.Interfaces;
 
 namespace SpotifyAPI.Controllers;
 
 [Route("api/[controller]/[action]")]
 [ApiController]
-public class FollowerController (
+public class LikesController(
     DataContext context,
     IMapper mapper,
     IIdentityService identityService,
-    IFollowerControllerService service,
-    IValidator<FollowerVm> validator,
-    IPaginationService<ArtistVm, FollowerFilterVm> pagination) : ControllerBase
+    ILikeControllerService service,
+    IValidator<LikeVm> validator,
+    IPaginationService<TrackVm, LikeFilterVm> pagination) : ControllerBase
 {
     [HttpGet]
     [Authorize(Roles = "Admin,User")]
@@ -30,10 +30,10 @@ public class FollowerController (
         if (user == null)
             return NotFound();
 
-        var artists = await context.Followers
+        var artists = await context.Likes
             .Where(x => x.UserId == user.Id)
-            .Select(x => x.Artist)
-            .ProjectTo<ArtistVm>(mapper.ConfigurationProvider)
+            .Select(x => x.Track)
+            .ProjectTo<TrackVm>(mapper.ConfigurationProvider)
             .ToArrayAsync();
 
         return Ok(artists);
@@ -41,7 +41,7 @@ public class FollowerController (
 
     [HttpGet]
     [Authorize(Roles = "Admin,User")]
-    public async Task<IActionResult> GetPage([FromQuery] FollowerFilterVm vm)
+    public async Task<IActionResult> GetPage([FromQuery] LikeFilterVm vm)
     {
         try
         {
@@ -60,7 +60,7 @@ public class FollowerController (
 
     [HttpPost]
     [Authorize(Roles = "Admin,User")]
-    public async Task<IActionResult> Follow([FromForm] FollowerVm vm)
+    public async Task<IActionResult> Like([FromForm] LikeVm vm)
     {
         var validationResult = await validator.ValidateAsync(vm);
 
@@ -68,13 +68,13 @@ public class FollowerController (
             return BadRequest(validationResult.Errors);
 
         var user = await identityService.GetCurrentUserAsync(this);
-        await service.Follow(user.Id, vm);
+        await service.Like(user.Id, vm);
         return Ok();
     }
 
     [HttpDelete]
     [Authorize(Roles = "Admin,User")]
-    public async Task<IActionResult> Unfollow([FromForm] FollowerVm vm)
+    public async Task<IActionResult> Unlike([FromForm] LikeVm vm)
     {
         var validationResult = await validator.ValidateAsync(vm);
 
@@ -82,7 +82,7 @@ public class FollowerController (
             return BadRequest(validationResult.Errors);
 
         var user = await identityService.GetCurrentUserAsync(this);
-        await service.Unfollow(user.Id, vm);
+        await service.Unlike(user.Id, vm);
         return Ok();
     }
 }

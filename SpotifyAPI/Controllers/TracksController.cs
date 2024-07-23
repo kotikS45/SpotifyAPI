@@ -1,12 +1,12 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using FluentValidation;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Model.Context;
 using SpotifyAPI.Models.Track;
 using SpotifyAPI.Services.Interfaces;
+using SpotifyAPI.Validators.Like;
 
 namespace SpotifyAPI.Controllers;
 
@@ -15,9 +15,11 @@ namespace SpotifyAPI.Controllers;
 public class TracksController(
     DataContext context,
     IMapper mapper,
+    IValidator<LikeValidator> likeValidator,
     IValidator<TrackCreateVm> createValidator,
     IValidator<TrackUpdateVm> updateValidator,
     ITrackControllerService service,
+    IIdentityService identityService,
     IPaginationService<TrackVm, TrackFilterVm> pagination
     ) : ControllerBase 
 {
