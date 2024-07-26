@@ -1,12 +1,12 @@
 ﻿using FluentValidation;
-using SpotifyAPI.Models.Artist;
+using SpotifyAPI.Models.Playlist;
 using SpotifyAPI.Services.Interfaces;
 
-namespace SpotifyAPI.Validators.Playlist;
+namespace SpotifyAPI.Validators.Artist;
 
-public class ArtistUpdateValidator : AbstractValidator<ArtistUpdateVm>
+public class PlaylistUpdateValidator : AbstractValidator<PlaylistUpdateVm>
 {
-    public ArtistUpdateValidator(IExistingEntityCheckerService existingEntityCheckerService, IImageValidator imageValidator)
+    public PlaylistUpdateValidator(IExistingEntityCheckerService existingEntityCheckerService, IImageValidator imageValidator)
     {
         RuleFor(c => c.Id)
             .MustAsync(existingEntityCheckerService.IsCorrectArtistId)
@@ -17,12 +17,6 @@ public class ArtistUpdateValidator : AbstractValidator<ArtistUpdateVm>
                 .WithMessage("Name is empty or null")
             .MaximumLength(255)
                 .WithMessage("Name is too long");
-
-        RuleFor(c => c.Genre)
-            .NotEmpty()
-                .WithMessage("Genre is empty or null")
-            .MaximumLength(255)
-                .WithMessage("Genre is too long");
 
         RuleFor(c => c.Image)
             .NotNull()
