@@ -15,11 +15,9 @@ namespace SpotifyAPI.Controllers;
 public class TracksController(
     DataContext context,
     IMapper mapper,
-    IValidator<LikeValidator> likeValidator,
     IValidator<TrackCreateVm> createValidator,
     IValidator<TrackUpdateVm> updateValidator,
     ITrackControllerService service,
-    IIdentityService identityService,
     IPaginationService<TrackVm, TrackFilterVm> pagination
     ) : ControllerBase 
 {
