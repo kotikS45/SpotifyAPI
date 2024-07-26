@@ -3,6 +3,7 @@ using Model.Entities;
 using Model.Entities.Identity;
 using SpotifyAPI.Models.Album;
 using SpotifyAPI.Models.Artist;
+using SpotifyAPI.Models.Genre;
 using SpotifyAPI.Models.Identity;
 using SpotifyAPI.Models.Playlist;
 using SpotifyAPI.Models.Track;
@@ -32,5 +33,7 @@ public class AppMapProfile : Profile
         CreateMap<Playlist, PlaylistVm>();
         CreateMap<PlaylistCreateVm, Playlist>()
             .ForMember(c => c.Image, opt => opt.Ignore());
+
+        CreateMap<Genre, GenreVm>();
     }
 }
