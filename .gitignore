@@ -282,3 +282,4 @@ yarn-error.log*
 package-lock.json
 
 SpotifyAPI/Data
+SpotifyAPI/appsettings.Development.json
