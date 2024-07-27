@@ -12,4 +12,5 @@ public class Track
 
     public ICollection<PlaylistTrack> Playlists { get; set; } = null!;
     public ICollection<Like> Likes { get; set; } = null!;
+    public ICollection<TrackGenre> Genres { get; set; } = null!;
 }

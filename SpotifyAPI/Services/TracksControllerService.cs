@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using Model.Context;
 using Model.Entities;
-using SpotifyAPI.Models.Like;
 using SpotifyAPI.Models.Track;
 using SpotifyAPI.Services.Interfaces;
 
@@ -25,6 +24,17 @@ public class TracksControllerService(
         try
         {
             await context.SaveChangesAsync();
+
+            foreach (var genreId in vm.Genres)
+            {
+                context.TrackGenres.Add(new TrackGenre
+                {
+                    TrackId = track.Id,
+                    GenreId = genreId
+                });
+            }
+
+            await context.SaveChangesAsync();
         }
         catch (Exception)
         {
@@ -43,6 +53,18 @@ public class TracksControllerService(
         track.Path = await audioService.SaveAudioAsync(vm.Audio);
         track.Duration = audioService.GetAudioDuration(track.Path);
         track.AlbumId = vm.AlbumId;
+
+        var genres = await context.TrackGenres.Where(x => x.TrackId == track.Id).ToArrayAsync();
+        context.TrackGenres.RemoveRange(genres);
+
+        foreach (var genreId in vm.Genres)
+        {
+            context.TrackGenres.Add(new TrackGenre
+            {
+                TrackId = track.Id,
+                GenreId = genreId
+            });
+        }
 
         try
         {

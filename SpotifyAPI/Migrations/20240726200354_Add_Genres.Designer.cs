@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace SpotifyAPI.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20240718215330_Initial")]
-    partial class Initial
+    [Migration("20240726200354_Add_Genres")]
+    partial class Add_Genres
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -76,10 +76,12 @@ namespace SpotifyAPI.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<long>", b =>
                 {
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("text");
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
 
                     b.Property<string>("ProviderKey")
-                        .HasColumnType("text");
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
 
                     b.Property<string>("ProviderDisplayName")
                         .HasColumnType("text");
@@ -100,10 +102,12 @@ namespace SpotifyAPI.Migrations
                         .HasColumnType("bigint");
 
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("text");
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
 
                     b.Property<string>("Name")
-                        .HasColumnType("text");
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
 
                     b.Property<string>("Value")
                         .HasColumnType("text");
@@ -152,11 +156,6 @@ namespace SpotifyAPI.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<string>("Genre")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
                     b.Property<string>("Image")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -185,6 +184,27 @@ namespace SpotifyAPI.Migrations
                     b.HasIndex("ArtistId");
 
                     b.ToTable("Follower", (string)null);
+                });
+
+            modelBuilder.Entity("Model.Entities.Genre", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Genres", (string)null);
                 });
 
             modelBuilder.Entity("Model.Entities.Identity.Role", b =>
@@ -403,6 +423,21 @@ namespace SpotifyAPI.Migrations
                     b.ToTable("Tracks", (string)null);
                 });
 
+            modelBuilder.Entity("Model.Entities.TrackGenre", b =>
+                {
+                    b.Property<long>("TrackId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("GenreId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("TrackId", "GenreId");
+
+                    b.HasIndex("GenreId");
+
+                    b.ToTable("TrackGenre", (string)null);
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<long>", b =>
                 {
                     b.HasOne("Model.Entities.Identity.Role", null)
@@ -548,6 +583,25 @@ namespace SpotifyAPI.Migrations
                     b.Navigation("Album");
                 });
 
+            modelBuilder.Entity("Model.Entities.TrackGenre", b =>
+                {
+                    b.HasOne("Model.Entities.Genre", "Genre")
+                        .WithMany("Tracks")
+                        .HasForeignKey("GenreId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Model.Entities.Track", "Track")
+                        .WithMany("Genres")
+                        .HasForeignKey("TrackId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Genre");
+
+                    b.Navigation("Track");
+                });
+
             modelBuilder.Entity("Model.Entities.Album", b =>
                 {
                     b.Navigation("Tracks");
@@ -558,6 +612,11 @@ namespace SpotifyAPI.Migrations
                     b.Navigation("Albums");
 
                     b.Navigation("Followers");
+                });
+
+            modelBuilder.Entity("Model.Entities.Genre", b =>
+                {
+                    b.Navigation("Tracks");
                 });
 
             modelBuilder.Entity("Model.Entities.Identity.Role", b =>
@@ -583,6 +642,8 @@ namespace SpotifyAPI.Migrations
 
             modelBuilder.Entity("Model.Entities.Track", b =>
                 {
+                    b.Navigation("Genres");
+
                     b.Navigation("Likes");
 
                     b.Navigation("Playlists");

@@ -1,12 +1,11 @@
-﻿using AutoMapper;
-using AutoMapper.QueryableExtensions;
-using FluentValidation;
+﻿using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Model.Context;
+using SpotifyAPI.Models.Genre;
 using SpotifyAPI.Models.Track;
 using SpotifyAPI.Services.Interfaces;
-using SpotifyAPI.Validators.Like;
 
 namespace SpotifyAPI.Controllers;
 
@@ -14,7 +13,6 @@ namespace SpotifyAPI.Controllers;
 [ApiController]
 public class TracksController(
     DataContext context,
-    IMapper mapper,
     IValidator<TrackCreateVm> createValidator,
     IValidator<TrackUpdateVm> updateValidator,
     ITrackControllerService service,
@@ -26,7 +24,17 @@ public class TracksController(
     public async Task<IActionResult> GetAll()
     {
         var tracks = await context.Tracks
-            .ProjectTo<TrackVm>(mapper.ConfigurationProvider)
+            .Include(t => t.Genres)
+                .ThenInclude(tg => tg.Genre)
+            .Select(t => new TrackVm
+            {
+                Id = t.Id,
+                Name = t.Name,
+                Duration = t.Duration,
+                AlbumId = t.AlbumId,
+                Path = t.Path,
+                Genres = t.Genres.Select(g => new GenreVm { Id = g.Genre.Id, Name = g.Genre.Name })
+            })
             .ToArrayAsync();
 
         return Ok(tracks);
@@ -48,17 +56,28 @@ public class TracksController(
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(long id)
     {
-        var tracks = await context.Tracks
-            .ProjectTo<TrackVm>(mapper.ConfigurationProvider)
+        var track = await context.Tracks
+            .Include(t => t.Genres)
+            .ThenInclude(tg => tg.Genre)
+            .Select(t => new TrackVm
+            {
+                Id = t.Id,
+                Name = t.Name,
+                Duration = t.Duration,
+                AlbumId = t.AlbumId,
+                Path = t.Path,
+                Genres = t.Genres.Select(g => new GenreVm { Id = g.Genre.Id, Name = g.Genre.Name }).ToList()
+            })
             .FirstOrDefaultAsync(c => c.Id == id);
 
-        if (tracks is null)
+        if (track is null)
             return NotFound();
 
-        return Ok(tracks);
+        return Ok(track);
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create(TrackCreateVm vm)
     {
         var validationResult = await createValidator.ValidateAsync(vm);
@@ -74,6 +93,7 @@ public class TracksController(
     }
 
     [HttpPut]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Update(TrackUpdateVm vm)
     {
         var validationResult = await updateValidator.ValidateAsync(vm);
@@ -89,6 +109,7 @@ public class TracksController(
     }
 
     [HttpDelete("id")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(long id)
     {
         await service.DeleteIfExistsAsync(id);

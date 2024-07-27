@@ -19,6 +19,8 @@ public class DataContext(DbContextOptions<DataContext> options)
     public DbSet<PlaylistTrack> PlaylistTracks { get; set; }
     public DbSet<Follower> Followers { get; set; }
     public DbSet<Like> Likes { get; set; }
+    public DbSet<Genre> Genres { get; set; }
+    public DbSet<TrackGenre> TrackGenres { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -34,5 +36,7 @@ public class DataContext(DbContextOptions<DataContext> options)
         new PlaylistTrackConfiguration().Configure(builder.Entity<PlaylistTrack>());
         new FollowerConfiguration().Configure(builder.Entity<Follower>());
         new LikeConfiguration().Configure(builder.Entity<Like>());
+        new GenreConfiguration().Configure(builder.Entity<Genre>());
+        new TrackGenreConfiguration().Configure(builder.Entity<TrackGenre>());
     }
 }

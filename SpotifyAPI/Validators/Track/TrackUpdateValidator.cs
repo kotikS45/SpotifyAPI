@@ -27,5 +27,13 @@ public class TrackUpdateValidator : AbstractValidator<TrackUpdateVm>
         RuleFor(a => a.AlbumId)
             .MustAsync(existingEntityCheckerService.IsCorrectAlbumId)
                 .WithMessage("Album with this if is not exists");
+
+        RuleForEach(a => a.Genres)
+            .MustAsync(existingEntityCheckerService.IsCorrectGenreId)
+                .WithMessage("One or more genre IDs are invalid");
+
+        RuleFor(a => a.Genres)
+            .Must(t => t.Count > 0)
+                .WithMessage("The track must have at least one genre");
     }
 }

@@ -38,7 +38,6 @@ public class ArtistsControllerService(
         string oldImage = artist.Image;
 
         artist.Name = vm.Name;
-        artist.Genre = vm.Genre;
         artist.Image = await imageService.SaveImageAsync(vm.Image);
 
         try

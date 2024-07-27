@@ -15,13 +15,13 @@ using SpotifyAPI.Models.Like;
 using SpotifyAPI.Models.Playlist;
 using SpotifyAPI.Models.PlaylistTrack;
 using SpotifyAPI.Models.Track;
+using SpotifyAPI.Services;
 using SpotifyAPI.Seeder;
 using SpotifyAPI.Seeder.Interfaces;
-using SpotifyAPI.Services;
-using SpotifyAPI.Services.Interfaces;
-using SpotifyAPI.Services.Pagination;
 using SpotifyAPI.Validators.Artist;
 using System.Text;
+using SpotifyAPI.Services.Interfaces;
+using SpotifyAPI.Services.Pagination;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -148,6 +148,8 @@ builder.Services.AddTransient<IPaginationService<ArtistVm, FollowerFilterVm>, Fo
 
 builder.Services.AddTransient<ILikeControllerService, LikeControllerService>();
 builder.Services.AddTransient<IPaginationService<TrackVm, LikeFilterVm>, LikePaginationService>();
+
+builder.Services.AddTransient<IGenreControllerService, GenreControllerService>();
 
 var app = builder.Build();
 

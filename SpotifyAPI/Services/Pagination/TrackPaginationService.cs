@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using Model.Context;
 using Model.Entities;
 using SpotifyAPI.Models.Track;
@@ -10,7 +11,11 @@ public class TrackPaginationService(
     IMapper mapper
     ) : PaginationService<Track, TrackVm, TrackFilterVm>(mapper)
 {
-    protected override IQueryable<Track> GetQuery() => context.Tracks.OrderBy(c => c.Id);
+    protected override IQueryable<Track> GetQuery() => 
+        context.Tracks
+        .Include(t => t.Genres)
+        .ThenInclude(tg => tg.Genre)
+        .OrderBy(c => c.Id);
 
     protected override IQueryable<Track> FilterQuery(IQueryable<Track> query, TrackFilterVm paginationVm)
     {

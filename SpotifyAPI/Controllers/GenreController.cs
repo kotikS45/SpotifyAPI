@@ -5,61 +5,48 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Model.Context;
-using SpotifyAPI.Models.Album;
+using SpotifyAPI.Models.Genre;
 using SpotifyAPI.Services.Interfaces;
 
 namespace SpotifyAPI.Controllers;
 
 [Route("api/[controller]/[action]")]
 [ApiController]
-public class AlbumsController(
+public class GenreController(
     DataContext context,
     IMapper mapper,
-    IValidator<AlbumCreateVm> createValidator,
-    IValidator<AlbumUpdateVm> updateValidator,
-    IAlbumsCotrollerService service,
-    IPaginationService<AlbumVm, AlbumFilterVm> pagination
+    IValidator<GenreCreateVm> createValidator,
+    IValidator<GenreUpdateVm> updateValidator,
+    IGenreControllerService service
     ) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var albums = await context.Albums
-            .ProjectTo<AlbumVm>(mapper.ConfigurationProvider)
+        var artists = await context.Genres
+            .ProjectTo<GenreVm>(mapper.ConfigurationProvider)
             .ToArrayAsync();
 
-        return Ok(albums);
-    }
-
-    [HttpGet]
-    public async Task<IActionResult> GetPage([FromQuery] AlbumFilterVm vm)
-    {
-        try
-        {
-            return Ok(await pagination.GetPageAsync(vm));
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ex.Message);
-        }
+        return Ok(artists);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(long id)
     {
-        var albums = await context.Albums
-            .ProjectTo<AlbumVm>(mapper.ConfigurationProvider)
-            .FirstOrDefaultAsync(c => c.Id == id);
+        var genre = await context.Genres
+            .FirstOrDefaultAsync(g => g.Id == id);
 
-        if (albums is null)
+        if (genre is null)
             return NotFound();
 
-        return Ok(albums);
+        var result = mapper.Map<GenreVm>(genre);
+
+        return Ok(result);
     }
 
     [HttpPost]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> Create([FromForm] AlbumCreateVm vm)
+    public async Task<IActionResult> Create(GenreCreateVm vm)
     {
         var validationResult = await createValidator.ValidateAsync(vm);
 
@@ -75,7 +62,7 @@ public class AlbumsController(
 
     [HttpPut]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> Update([FromForm] AlbumUpdateVm vm)
+    public async Task<IActionResult> Update(GenreUpdateVm vm)
     {
         var validationResult = await updateValidator.ValidateAsync(vm);
 

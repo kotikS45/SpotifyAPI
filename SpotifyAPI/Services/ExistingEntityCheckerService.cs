@@ -19,4 +19,10 @@ public class ExistingEntityCheckerService(
 
     public async Task<bool> IsCorrectPlaylistId(long id, CancellationToken cancellationToken) =>
         await context.Playlists.AnyAsync(a => a.Id == id, cancellationToken);
+
+    public async Task<bool> IsCorrectGenreId(long id, CancellationToken cancellationToken) =>
+        await context.Genres.AnyAsync(a => a.Id == id, cancellationToken);
+
+    public async Task<bool> IsAvailableGenreName(string name, CancellationToken cancellationToken) =>
+        ! await context.Genres.AnyAsync(a => a.Name == name, cancellationToken);
 }
