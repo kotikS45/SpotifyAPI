@@ -23,6 +23,7 @@ public class PlaylistsController(
     ) : ControllerBase
 {
     [HttpGet]
+    [Authorize(Roles = "Admin,User")]
     public async Task<IActionResult> GetAll()
     {
         var entities = await context.Playlists

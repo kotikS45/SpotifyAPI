@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Model.Context;
@@ -57,6 +58,7 @@ public class AlbumsController(
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create([FromForm] AlbumCreateVm vm)
     {
         var validationResult = await createValidator.ValidateAsync(vm);
@@ -72,6 +74,7 @@ public class AlbumsController(
     }
 
     [HttpPut]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Update([FromForm] AlbumUpdateVm vm)
     {
         var validationResult = await updateValidator.ValidateAsync(vm);
@@ -87,6 +90,7 @@ public class AlbumsController(
     }
 
     [HttpDelete("id")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(long id)
     {
         await service.DeleteIfExistsAsync(id);

@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Model.Context;
@@ -31,6 +32,7 @@ public class TracksController(
                 Name = t.Name,
                 Duration = t.Duration,
                 AlbumId = t.AlbumId,
+                Path = t.Path,
                 Genres = t.Genres.Select(g => new GenreVm { Id = g.Genre.Id, Name = g.Genre.Name })
             })
             .ToArrayAsync();
@@ -62,6 +64,8 @@ public class TracksController(
                 Id = t.Id,
                 Name = t.Name,
                 Duration = t.Duration,
+                AlbumId = t.AlbumId,
+                Path = t.Path,
                 Genres = t.Genres.Select(g => new GenreVm { Id = g.Genre.Id, Name = g.Genre.Name }).ToList()
             })
             .FirstOrDefaultAsync(c => c.Id == id);
@@ -73,6 +77,7 @@ public class TracksController(
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create(TrackCreateVm vm)
     {
         var validationResult = await createValidator.ValidateAsync(vm);
@@ -88,6 +93,7 @@ public class TracksController(
     }
 
     [HttpPut]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Update(TrackUpdateVm vm)
     {
         var validationResult = await updateValidator.ValidateAsync(vm);
@@ -103,6 +109,7 @@ public class TracksController(
     }
 
     [HttpDelete("id")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(long id)
     {
         await service.DeleteIfExistsAsync(id);

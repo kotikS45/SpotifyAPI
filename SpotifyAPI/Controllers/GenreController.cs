@@ -1,10 +1,10 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Model.Context;
-using Model.Entities;
 using SpotifyAPI.Models.Genre;
 using SpotifyAPI.Services.Interfaces;
 
@@ -39,12 +39,13 @@ public class GenreController(
         if (genre is null)
             return NotFound();
 
-        var result = mapper.Map<Genre>(genre);
+        var result = mapper.Map<GenreVm>(genre);
 
         return Ok(result);
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create(GenreCreateVm vm)
     {
         var validationResult = await createValidator.ValidateAsync(vm);
@@ -60,6 +61,7 @@ public class GenreController(
     }
 
     [HttpPut]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Update(GenreUpdateVm vm)
     {
         var validationResult = await updateValidator.ValidateAsync(vm);
@@ -75,6 +77,7 @@ public class GenreController(
     }
 
     [HttpDelete("id")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(long id)
     {
         await service.DeleteIfExistsAsync(id);

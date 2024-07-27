@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Model.Context;
 using SpotifyAPI.Models.Pagination;
+using Microsoft.AspNetCore.Authorization;
 
 namespace SpotifyAPI.Controllers;
 
@@ -58,6 +59,7 @@ public class ArtistsController(
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create([FromForm] ArtistCreateVm vm)
     {
         var validationResult = await createValidator.ValidateAsync(vm);
@@ -73,6 +75,7 @@ public class ArtistsController(
     }
 
     [HttpPut]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Update([FromForm] ArtistUpdateVm vm)
     {
         var validationResult = await updateValidator.ValidateAsync(vm);
@@ -88,6 +91,7 @@ public class ArtistsController(
     }
 
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(long id)
     {
         await service.DeleteIfExistsAsync(id);

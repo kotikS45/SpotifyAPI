@@ -149,6 +149,8 @@ builder.Services.AddTransient<IPaginationService<ArtistVm, FollowerFilterVm>, Fo
 builder.Services.AddTransient<ILikeControllerService, LikeControllerService>();
 builder.Services.AddTransient<IPaginationService<TrackVm, LikeFilterVm>, LikePaginationService>();
 
+builder.Services.AddTransient<IGenreControllerService, GenreControllerService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

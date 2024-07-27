@@ -28,12 +28,18 @@ public class AppMapProfile : Profile
         CreateMap<Track, TrackVm>();
         CreateMap<TrackCreateVm, Track>()
             .ForMember(c => c.Path, opt => opt.Ignore())
-            .ForMember(C => C.Duration, opt => opt.Ignore());
+            .ForMember(C => C.Duration, opt => opt.Ignore())
+            .ForMember(c => c.Genres, opt => opt.Ignore());
 
         CreateMap<Playlist, PlaylistVm>();
         CreateMap<PlaylistCreateVm, Playlist>()
             .ForMember(c => c.Image, opt => opt.Ignore());
 
         CreateMap<Genre, GenreVm>();
+        CreateMap<GenreCreateVm, Genre>();
+
+        CreateMap<TrackGenre, GenreVm>()
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Genre.Id))
+            .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Genre.Name));
     }
 }

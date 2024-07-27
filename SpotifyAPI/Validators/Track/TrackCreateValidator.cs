@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
 using SpotifyAPI.Models.Track;
-using SpotifyAPI.Services;
 using SpotifyAPI.Services.Interfaces;
 
 namespace SpotifyAPI.Validators.Track;
@@ -24,5 +23,13 @@ public class TrackCreateValidator : AbstractValidator<TrackCreateVm>
         RuleFor(a => a.AlbumId)
             .MustAsync(existingEntityCheckerService.IsCorrectAlbumId)
                 .WithMessage("Album with this if is not exists");
+
+        RuleForEach(a => a.Genres)
+            .MustAsync(existingEntityCheckerService.IsCorrectGenreId)
+                .WithMessage("One or more genre IDs are invalid");
+
+        RuleFor(a => a.Genres)
+            .Must(t => t.Count > 0)
+                .WithMessage("The track must have at least one genre");
     }
 }
