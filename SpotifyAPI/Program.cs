@@ -111,7 +111,9 @@ builder.Services.AddAutoMapper(typeof(AppMapProfile));
 builder.Services.AddValidatorsFromAssemblyContaining<PlaylistCreateValidator>();
 
 builder.Services.AddScoped<IMigrationService, MigrationService>();
+
 builder.Services.AddScoped<IIdentitySeeder, IdentitySeeder>();
+builder.Services.AddScoped<IDataSeeder, DataSeeder>();
 
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 
@@ -204,6 +206,7 @@ await using (var scope = app.Services.GetRequiredService<IServiceScopeFactory>()
 {
     await scope.ServiceProvider.GetRequiredService<IMigrationService>().MigrateLatestAsync();
     await scope.ServiceProvider.GetRequiredService<IIdentitySeeder>().SeedAsync();
+    await scope.ServiceProvider.GetRequiredService<IDataSeeder>().SeedAsync();
 }
 
 app.Run();
