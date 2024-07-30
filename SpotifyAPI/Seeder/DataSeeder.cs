@@ -17,7 +17,6 @@ public class DataSeeder(
     {
         if (!await context.Artists.AnyAsync())
             await CreateArtistsAsync();
-
     }
 
     public async Task CreateArtistsAsync()
@@ -26,7 +25,7 @@ public class DataSeeder(
         using var httpClient = new HttpClient();
 
         var artists = new List<Artist>();
-        for (int i = 0; i < 50; i++)
+        for (int i = 0; i < 20; i++)
         {
             var imageUrl = faker.Internet.Avatar();
             var base64 = await GetImageAsBase64Async(httpClient, imageUrl);
@@ -40,10 +39,43 @@ public class DataSeeder(
             artists.Add(artist);
         }
 
-        context.AddRange(artists);
-        context.SaveChanges();
+        await context.AddRangeAsync(artists);
+        await context.SaveChangesAsync();
+
+        await CreateAlbumsAsync(artists);
     }
 
+    public async Task CreateAlbumsAsync(IList<Artist> artists)
+    {
+        Faker faker = new Faker();
+        using var httpClient = new HttpClient();
+
+        var albums = new List<Album>();
+
+        foreach (var artist in artists)
+        {
+            int count = faker.Random.Int(1, 10);
+
+            for (int i = 0; i < count; i++)
+            {
+                var imageUrl = faker.Image.LoremFlickrUrl(keywords: "album");
+                var base64 = await GetImageAsBase64Async(httpClient, imageUrl);
+
+                var album = new Album
+                {
+                    Name = faker.Lorem.Sentence(),
+                    ReleaseDate = faker.Date.Past(10),
+                    Image = await imageService.SaveImageAsync(base64),
+                    ArtistId = artist.Id
+                };
+
+                albums.Add(album);
+            }
+        }
+
+        await context.Albums.AddRangeAsync(albums);
+        await context.SaveChangesAsync();
+    }
 
     private static async Task<string> GetImageAsBase64Async(HttpClient httpClient, string imageUrl)
     {
