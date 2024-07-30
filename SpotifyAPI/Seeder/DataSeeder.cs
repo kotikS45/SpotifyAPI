@@ -26,6 +26,12 @@ public class DataSeeder(
 
         if (!await context.Playlists.AnyAsync())
             await CreatePlaylistsAsync();
+
+        if (!await context.Followers.AnyAsync())
+            await CreateFollowersAsync();
+
+        if (!await context.Likes.AnyAsync())
+            await CreateLikesAsync();
     }
 
     public async Task CreateGenresAsync()
@@ -242,6 +248,50 @@ public class DataSeeder(
         }
 
         await context.AddRangeAsync(playlistTracks);
+        await context.SaveChangesAsync();
+    }
+
+    private async Task CreateFollowersAsync()
+    {
+        Faker faker = new Faker();
+        var artists = await context.Artists.ToListAsync();
+
+        var followers = new List<Follower>();
+
+        var selectedArtists = faker.PickRandom(artists, 5);
+
+        foreach (var item in selectedArtists)
+        {
+            followers.Add(new Follower
+            {
+                ArtistId = item.Id,
+                UserId = (await context.Users.FirstAsync(x => x.UserName == "admin")).Id
+            });
+        }
+
+        await context.AddRangeAsync(followers);
+        await context.SaveChangesAsync();
+    }
+
+    private async Task CreateLikesAsync()
+    {
+        Faker faker = new Faker();
+        var tracks = await context.Tracks.ToListAsync();
+
+        var likes = new List<Like>();
+
+        var selectedTracks = faker.PickRandom(tracks, 20);
+
+        foreach (var item in selectedTracks)
+        {
+            likes.Add(new Like
+            {
+                TrackId = item.Id,
+                UserId = (await context.Users.FirstAsync(x => x.UserName == "admin")).Id
+            });
+        }
+
+        await context.AddRangeAsync(likes);
         await context.SaveChangesAsync();
     }
 
