@@ -15,7 +15,6 @@ public class DataSeeder(
     ) : IDataSeeder
 {
     string apiKey = "2d375f10";
-    string id = "1248";
 
     public async Task SeedAsync()
     {
@@ -24,6 +23,9 @@ public class DataSeeder(
 
         if (!await context.Artists.AnyAsync())
             await CreateArtistsAsync();
+
+        if (!await context.Playlists.AnyAsync())
+            await CreatePlaylistsAsync();
     }
 
     public async Task CreateGenresAsync()
@@ -187,6 +189,60 @@ public class DataSeeder(
         }
 
         return trackUrls;
+    }
+
+    public async Task CreatePlaylistsAsync()
+    {
+        Faker faker = new Faker();
+        using var httpClient = new HttpClient();
+
+        var playlists = new List<Playlist>();
+        for (int i = 0; i < 10; i++)
+        {
+            var imageUrl = faker.Image.LoremFlickrUrl(keywords: "playlist");
+            var base64 = await GetImageAsBase64Async(httpClient, imageUrl);
+
+            var playlist = new Playlist
+            {
+                Name = faker.Name.FullName(),
+                Image = await imageService.SaveImageAsync(base64),
+                UserId = (await context.Users.FirstAsync(x => x.UserName == "admin")).Id,
+            };
+
+            playlists.Add(playlist);
+        }
+
+        await context.AddRangeAsync(playlists);
+        await context.SaveChangesAsync();
+
+        await AddTracksToPlaylistsAsync(playlists);
+    }
+
+    public async Task AddTracksToPlaylistsAsync(IList<Playlist> playlists)
+    {
+        Faker faker = new Faker();
+        var tracks = await context.Tracks.ToListAsync();
+
+        var playlistTracks = new List<PlaylistTrack>();
+
+        foreach (var playlist in playlists)
+        {
+            int trackCount = faker.Random.Int(10, 20);
+
+            var selectedTracks = faker.PickRandom(tracks, trackCount);
+
+            foreach (var track in selectedTracks)
+            {
+                playlistTracks.Add(new PlaylistTrack
+                {
+                    PlaylistId = playlist.Id,
+                    TrackId = track.Id
+                });
+            }
+        }
+
+        await context.AddRangeAsync(playlistTracks);
+        await context.SaveChangesAsync();
     }
 
     private static async Task<string> GetImageAsBase64Async(HttpClient httpClient, string imageUrl)
