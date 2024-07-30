@@ -15,8 +15,31 @@ public class DataSeeder(
 {
     public async Task SeedAsync()
     {
+        if (!await context.Genres.AnyAsync())
+            await CreateGenresAsync();
+
         if (!await context.Artists.AnyAsync())
             await CreateArtistsAsync();
+    }
+
+    public async Task CreateGenresAsync()
+    {
+        var genres = new List<Genre>
+        {
+            new Genre { Name = "Rock" },
+            new Genre { Name = "Pop" },
+            new Genre { Name = "Jazz" },
+            new Genre { Name = "Classical" },
+            new Genre { Name = "Hip-Hop" },
+            new Genre { Name = "Electronic" },
+            new Genre { Name = "Country" },
+            new Genre { Name = "Reggae" },
+            new Genre { Name = "Blues" },
+            new Genre { Name = "Metal" }
+        };
+
+        await context.Genres.AddRangeAsync(genres);
+        await context.SaveChangesAsync();
     }
 
     public async Task CreateArtistsAsync()
@@ -25,7 +48,7 @@ public class DataSeeder(
         using var httpClient = new HttpClient();
 
         var artists = new List<Artist>();
-        for (int i = 0; i < 20; i++)
+        for (int i = 0; i < 5; i++)
         {
             var imageUrl = faker.Internet.Avatar();
             var base64 = await GetImageAsBase64Async(httpClient, imageUrl);
