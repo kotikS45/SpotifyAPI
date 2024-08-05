@@ -6,4 +6,6 @@ namespace SpotifyAPI.Services.Interfaces;
 public interface IAccountsControllerService
 {
     Task<User> SignUpAsync(RegisterVm vm);
+    Task ResetPasswordAsync(string email, string token, string newPassword);
+    Task GeneratePasswordResetTokenAsync(string email);
 }
