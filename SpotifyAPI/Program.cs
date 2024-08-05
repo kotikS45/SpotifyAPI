@@ -1,5 +1,6 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
@@ -22,6 +23,7 @@ using SpotifyAPI.Validators.Artist;
 using System.Text;
 using SpotifyAPI.Services.Interfaces;
 using SpotifyAPI.Services.Pagination;
+using SpotifyAPI.SMTP;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -79,6 +81,11 @@ builder.Services
             ClockSkew = TimeSpan.Zero
         };
     });
+
+builder.Services.Configure<KestrelServerOptions>(options =>
+{
+    options.Limits.MaxRequestBodySize = 1048576000;
+});
 
 builder.Services.AddControllers();
 
@@ -152,6 +159,10 @@ builder.Services.AddTransient<ILikeControllerService, LikeControllerService>();
 builder.Services.AddTransient<IPaginationService<TrackVm, LikeFilterVm>, LikePaginationService>();
 
 builder.Services.AddTransient<IGenreControllerService, GenreControllerService>();
+
+builder.Services.Configure<EmailConfiguration>(builder.Configuration.GetSection("MailSettings"));
+
+builder.Services.AddTransient<IEmailService, EmailService>();
 
 var app = builder.Build();
 

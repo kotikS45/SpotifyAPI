@@ -3,8 +3,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Model.Entities.Identity;
 using SpotifyAPI.Exceptions;
+using SpotifyAPI.Models.Errors;
 using SpotifyAPI.Models.Identity;
 using SpotifyAPI.Services.Interfaces;
+using SpotifyAPI.SMTP;
 
 namespace SpotifyAPI.Controllers;
 
@@ -51,6 +53,34 @@ public class AccountsController(
         catch (IdentityException e)
         {
             return StatusCode(500, e.IdentityResult.Errors);
+        }
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordVm vm)
+    {
+        try
+        {
+            await service.GeneratePasswordResetTokenAsync(vm.Email);
+            return Ok();
+        }
+        catch (Exception e)
+        {
+            return StatusCode(500, new ErrorResponse { Message = e.Message, StatusCode = 500 });
+        }
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordVm vm)
+    {
+        try
+        {
+            await service.ResetPasswordAsync(vm.Email, vm.Token, vm.Password);
+            return Ok();
+        }
+        catch (Exception e)
+        {
+            return StatusCode(500, new ErrorResponse { Message = e.Message, StatusCode = 500 });
         }
     }
 }
