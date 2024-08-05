@@ -6,6 +6,7 @@ using SpotifyAPI.Constants;
 using SpotifyAPI.Exceptions;
 using SpotifyAPI.Models.Identity;
 using SpotifyAPI.Services.Interfaces;
+using SpotifyAPI.SMTP;
 
 namespace SpotifyAPI.Services;
 
@@ -13,7 +14,9 @@ public class AccountsControllerService(
     DataContext context,
     UserManager<User> userManager,
     IMapper mapper,
-    IImageService imageService
+    IImageService imageService,
+    IConfiguration configuration,
+    IEmailService emailService
     ) : IAccountsControllerService
 {
 
@@ -64,5 +67,48 @@ public class AccountsControllerService(
             return await userManager.CreateAsync(user);
 
         return await userManager.CreateAsync(user, password);
+    }
+
+    public async Task ResetPasswordAsync(string email, string token, string newPassword)
+    {
+        var user = await userManager.FindByEmailAsync(email);
+        if (user == null)
+        {
+            return;
+        }
+
+        var result = await userManager.ResetPasswordAsync(user, token, newPassword);
+
+        if (!result.Succeeded)
+        {
+            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+            throw new Exception($"Password reset failed: {errors}");
+        }
+    }
+
+    public async Task GeneratePasswordResetTokenAsync(string email)
+    {
+        var url = configuration["PasswordReset:CallbackUrl"]
+               ?? throw new NullReferenceException("PasswordReset:CallbackUrl");
+
+        var user = await userManager.FindByEmailAsync(email);
+
+        if (user == null)
+        {
+            return;
+        }
+
+        var token = await userManager.GeneratePasswordResetTokenAsync(user);
+
+        var callbackUrl = $"{url}?token={token}&email={email}";
+
+        var message = new Message()
+        {
+            To = user.Email,
+            Name = user.UserName,
+            Body = $"Please reset your password by clicking here: <a href='{callbackUrl}'>link</a>"
+        };
+
+        await emailService.SendAsync(message);
     }
 }
