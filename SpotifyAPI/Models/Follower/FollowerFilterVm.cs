@@ -6,4 +6,5 @@ public class FollowerFilterVm : PaginationVm
 {
     public string? Name { get; set; }
     public string Username { get; set; } = null!;
+    // public string Music { get; get; } = null!;
 }
