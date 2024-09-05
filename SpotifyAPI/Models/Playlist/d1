@@ -1,0 +1,10 @@
+//*public static class DatabaseExtensions
+{
+    public static void MigrateDatabase(this IApplicationBuilder app)
+    {
+        using var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope();
+        var context = serviceScope.ServiceProvider.GetService<DataContext>();
+        context.Database.Migrate(); // Автоматично застосовує міграції при запуску програми
+    }
+}
+*//
