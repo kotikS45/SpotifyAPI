@@ -1,4 +1,6 @@
-﻿using FluentValidation;
+﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +16,7 @@ namespace SpotifyAPI.Controllers;
 public class PlaylistTracksController(
     DataContext context,
     IIdentityService identityService,
+    IMapper mapper,
     IValidator<PlaylistTrackCreateVm> createValidator,
     IValidator<PlaylistTrackDeleteVm> deleteValidator,
     IPlaylistTrackControllerService service,
@@ -35,6 +38,7 @@ public class PlaylistTracksController(
         var tracks = await context.PlaylistTracks
             .Where(pt => pt.PlaylistId == id)
             .Select(pt => pt.Track)
+            .ProjectTo<TrackVm>(mapper.ConfigurationProvider)
             .ToArrayAsync();
 
         return Ok(tracks);
