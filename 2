@@ -1,0 +1,68 @@
+using Microsoft.EntityFrameworkCore;
+using Model.Context;
+using Model.Entities;
+
+namespace SpotifyAPI.Services
+{
+    public class PlaylistService
+    {
+        private readonly DataContext _context;
+
+        public PlaylistService(DataContext context)
+        {
+            _context = context;
+        }
+
+        // Створення нового плейлиста
+        public async Task<Playlist> CreatePlaylistAsync(long userId, string playlistName, string imageUrl, IEnumerable<long> trackIds)
+        {
+            var playlist = new Playlist
+            {
+                Name = playlistName,
+                Image = imageUrl,
+                UserId = userId,
+                Tracks = trackIds.Select(trackId => new PlaylistTrack { TrackId = trackId }).ToList()
+            };
+
+            _context.Playlists.Add(playlist);
+            await _context.SaveChangesAsync();
+            return playlist;
+        }
+
+        // Отримання всіх плейлистів користувача
+        public async Task<IEnumerable<Playlist>> GetUserPlaylistsAsync(long userId)
+        {
+            return await _context.Playlists
+                .Include(p => p.Tracks)
+                    .ThenInclude(pt => pt.Track)
+                .Where(p => p.UserId == userId)
+                .ToListAsync();
+        }
+
+        // Додавання треку до плейлиста
+        public async Task AddTrackToPlaylistAsync(long playlistId, long trackId)
+        {
+            var playlistTrack = new PlaylistTrack
+            {
+                PlaylistId = playlistId,
+                TrackId = trackId
+            };
+
+            _context.PlaylistTracks.Add(playlistTrack);
+            await _context.SaveChangesAsync();
+        }
+
+        // Видалення треку з плейлиста
+        public async Task RemoveTrackFromPlaylistAsync(long playlistId, long trackId)
+        {
+            var playlistTrack = await _context.PlaylistTracks
+                .FirstOrDefaultAsync(pt => pt.PlaylistId == playlistId && pt.TrackId == trackId);
+
+            if (playlistTrack != null)
+            {
+                _context.PlaylistTracks.Remove(playlistTrack);
+                await _context.SaveChangesAsync();
+            }
+        }
+    }
+}
