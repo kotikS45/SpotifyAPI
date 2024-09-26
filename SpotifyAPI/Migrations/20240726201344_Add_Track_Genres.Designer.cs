@@ -72,7 +72,85 @@ namespace SpotifyAPI.Migrations
 
                     b.ToTable("AspNetUserClaims", (string)null);
                 });
+/*
+protected override void OnModelCreating(ModelBuilder modelBuilder)
+{
+    modelBuilder
+        .HasAnnotation("ProductVersion", "8.0.7")
+        .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
+    // Налаштування AspNetRoleClaims
+    modelBuilder.Entity<IdentityRoleClaim<long>>(entity =>
+    {
+        entity.Property(e => e.Id)
+              .ValueGeneratedOnAdd();
+        
+        entity.HasIndex(e => e.RoleId);
+        entity.ToTable("AspNetRoleClaims");
+    });
+
+    // Налаштування AspNetUserClaims
+    modelBuilder.Entity<IdentityUserClaim<long>>(entity =>
+    {
+        entity.Property(e => e.Id)
+              .ValueGeneratedOnAdd();
+        
+        entity.HasIndex(e => e.UserId);
+        entity.ToTable("AspNetUserClaims");
+    });
+
+    // Налаштування AspNetUserLogins
+    modelBuilder.Entity<IdentityUserLogin<long>>(entity =>
+    {
+        entity.HasKey(e => new { e.LoginProvider, e.ProviderKey });
+        entity.HasIndex(e => e.UserId);
+        entity.ToTable("AspNetUserLogins");
+    });
+
+    // Налаштування AspNetUserTokens
+    modelBuilder.Entity<IdentityUserToken<long>>(entity =>
+    {
+        entity.HasKey(e => new { e.UserId, e.LoginProvider, e.Name });
+        entity.ToTable("AspNetUserTokens");
+    });
+
+    // Налаштування Album
+    modelBuilder.Entity<Album>(entity =>
+    {
+        entity.Property(e => e.Id)
+              .ValueGeneratedOnAdd();
+        
+        entity.Property(e => e.Name)
+              .IsRequired()
+              .HasMaxLength(255);
+        
+        entity.Property(e => e.Image)
+              .IsRequired()
+              .HasMaxLength(255);
+        
+        entity.HasIndex(e => e.ArtistId);
+        entity.ToTable("Albums");
+    });
+
+    // Налаштування Artist
+    modelBuilder.Entity<Artist>(entity =>
+    {
+        entity.Property(e => e.Id)
+              .ValueGeneratedOnAdd();
+        
+        entity.Property(e => e.Name)
+              .IsRequired()
+              .HasMaxLength(255);
+        
+        entity.Property(e => e.Image)
+              .IsRequired()
+              .HasMaxLength(255);
+        
+        entity.ToTable("Artists");
+    });
+}
+
+*/
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<long>", b =>
                 {
                     b.Property<string>("LoginProvider")
