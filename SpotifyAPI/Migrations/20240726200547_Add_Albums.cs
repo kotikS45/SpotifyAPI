@@ -47,3 +47,76 @@ namespace SpotifyAPI.Migrations
         }
     }
 }
+/*
+using AutoMapper;
+using Model.Entities;
+using Model.Entities.Identity;
+using SpotifyAPI.Models.Album;
+using SpotifyAPI.Models.Artist;
+using SpotifyAPI.Models.Genre;
+using SpotifyAPI.Models.Identity;
+using SpotifyAPI.Models.Playlist;
+using SpotifyAPI.Models.Track;
+
+namespace SpotifyAPI.Mapper
+{
+    public class AppMapProfile : Profile
+    {
+        public AppMapProfile()
+        {
+            CreateMap<RegisterVm, User>()
+                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.Email)); // Можна налаштувати додаткові правила маппінгу
+
+            CreateMap<User, UserVm>()
+                .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => $"{src.FirstName} {src.LastName}"));
+
+            CreateArtistMaps();
+            CreateAlbumMaps();
+            CreateTrackMaps();
+            CreatePlaylistMaps();
+            CreateGenreMaps();
+        }
+
+        private void CreateArtistMaps()
+        {
+            CreateMap<Artist, ArtistVm>();
+            CreateMap<ArtistCreateVm, Artist>()
+                .ForMember(c => c.Image, opt => opt.Ignore()); // Можливо, слід додати обробку для Image пізніше
+        }
+
+        private void CreateAlbumMaps()
+        {
+            CreateMap<Album, AlbumVm>();
+            CreateMap<AlbumCreateVm, Album>()
+                .ForMember(c => c.Image, opt => opt.Ignore()); // Коментар: поле Image може бути встановлено через інший механізм
+        }
+
+        private void CreateTrackMaps()
+        {
+            CreateMap<Track, TrackVm>();
+            CreateMap<TrackCreateVm, Track>()
+                .ForMember(c => c.Path, opt => opt.Ignore()) // Якщо Path приходить з іншого джерела
+                .ForMember(c => c.Duration, opt => opt.Ignore()) // Можливо, Duration рахується автоматично
+                .ForMember(c => c.Genres, opt => opt.Ignore()); // Genres може бути оброблено окремо
+        }
+
+        private void CreatePlaylistMaps()
+        {
+            CreateMap<Playlist, PlaylistVm>();
+            CreateMap<PlaylistCreateVm, Playlist>()
+                .ForMember(c => c.Image, opt => opt.Ignore()); // Можливо, слід додати обробку для Image пізніше
+        }
+
+        private void CreateGenreMaps()
+        {
+            CreateMap<Genre, GenreVm>();
+            CreateMap<GenreCreateVm, Genre>();
+
+            CreateMap<TrackGenre, GenreVm>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Genre.Id))
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Genre.Name));
+        }
+    }
+}
+
+*/
