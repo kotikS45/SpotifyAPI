@@ -20,7 +20,12 @@ public class AppMapProfile : Profile
         CreateMap<Artist, ArtistVm>();
         CreateMap<ArtistCreateVm, Artist>()
             .ForMember(c => c.Image, opt => opt.Ignore());
-
+/*
+CreateMap<TrackCreateVm, Track>()
+    .ForMember(c => c.Path, opt => opt.Ignore()) 
+    .ForMember(c => c.Duration, opt => opt.MapFrom(src => CalculateDuration(src.File)))
+    .ForMember(c => c.Genres, opt => opt.MapFrom(src => MapGenres(src.GenreIds)));
+*/
         CreateMap<Album, AlbumVm>();
         CreateMap<AlbumCreateVm, Album>()
             .ForMember(c => c.Image, opt => opt.Ignore());
