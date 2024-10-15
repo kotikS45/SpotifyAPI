@@ -6,6 +6,7 @@ public class Track
     public int Duration { get; set; }
     public string Name { get; set; } = null!;
     public string Path { get; set; } = null!;
+    public string Image { get; set; } = null!;
 
     public long AlbumId { get; set; }
     public Album Album { get; set; } = null!;

@@ -20,5 +20,9 @@ public class TrackConfiguration : IEntityTypeConfiguration<Track>
         builder.Property(a => a.Path)
             .HasMaxLength(255)
             .IsRequired();
+
+        builder.Property(a => a.Image)
+            .HasMaxLength(255)
+            .IsRequired();
     }
 }

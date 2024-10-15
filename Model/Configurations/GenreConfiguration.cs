@@ -16,5 +16,9 @@ public class GenreConfiguration : IEntityTypeConfiguration<Genre>
 
         builder.HasIndex(g => g.Name)
             .IsUnique();
+
+        builder.Property(a => a.Image)
+            .HasMaxLength(255)
+            .IsRequired();
     }
 }

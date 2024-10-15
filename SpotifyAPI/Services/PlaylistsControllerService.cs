@@ -57,7 +57,7 @@ public class PlaylistsControllerService(
     {
         var playlist = await context.Playlists.FirstOrDefaultAsync(p => p.Id == id);
 
-        if (playlist == null)
+        if (playlist is null)
         {
             return;
         }
