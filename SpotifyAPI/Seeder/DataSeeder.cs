@@ -1,8 +1,10 @@
 ﻿using Bogus;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Model.Context;
 using Model.Entities;
 using Newtonsoft.Json;
+using SpotifyAPI.Configuration;
 using SpotifyAPI.Seeder.Interfaces;
 using SpotifyAPI.Services.Interfaces;
 
@@ -11,13 +13,17 @@ namespace SpotifyAPI.Seeder;
 public class DataSeeder(
     DataContext context,
     IImageService imageService,
-    IAudioService audioService
+    IAudioService audioService,
+    IOptions<ApiKeys> apiKeys
     ) : IDataSeeder
 {
-    string apiKey = "6c266ad5";
+    private string apiKey = "";
 
     public async Task SeedAsync()
     {
+        if (apiKeys != null)
+            apiKey = apiKeys.Value.Jamendo;
+
         if (!await context.Genres.AnyAsync())
             await CreateGenresAsync();
 

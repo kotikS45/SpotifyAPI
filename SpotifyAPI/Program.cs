@@ -24,6 +24,7 @@ using System.Text;
 using SpotifyAPI.Services.Interfaces;
 using SpotifyAPI.Services.Pagination;
 using SpotifyAPI.SMTP;
+using SpotifyAPI.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -163,6 +164,8 @@ builder.Services.AddTransient<IGenreControllerService, GenreControllerService>()
 builder.Services.Configure<EmailConfiguration>(builder.Configuration.GetSection("MailSettings"));
 
 builder.Services.AddTransient<IEmailService, EmailService>();
+
+builder.Services.Configure<ApiKeys>(builder.Configuration.GetSection("ApiKeys"));
 
 var app = builder.Build();
 
