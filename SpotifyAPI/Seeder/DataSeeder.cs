@@ -152,12 +152,16 @@ public class DataSeeder(
                 var audioBytes = await httpClient.GetByteArrayAsync(urls[i]);
                 var audioPath = await audioService.SaveAudioAsync(audioBytes);
 
+                var imageUrl = faker.Image.LoremFlickrUrl(keywords: "album");
+                var base64 = await GetImageAsBase64Async(httpClient, imageUrl);
+
                 var track = new Track
                 {
                     Name = faker.Lorem.Sentence(),
                     Path = audioPath,
                     Duration = audioService.GetAudioDuration(audioPath),
-                    AlbumId = album.Id
+                    AlbumId = album.Id,
+                    Image = await imageService.SaveImageAsync(base64)
                 };
                 int genreCount = faker.Random.Int(1, 3);
                 var selectedGenres = faker.PickRandom(genres, genreCount).ToList();
@@ -306,7 +310,8 @@ public class DataSeeder(
             likes.Add(new Like
             {
                 TrackId = item.Id,
-                UserId = (await context.Users.FirstAsync(x => x.UserName == "admin")).Id
+                UserId = (await context.Users.FirstAsync(x => x.UserName == "admin")).Id,
+                LikeDateTime = DateTime.Now
             });
         }
 
