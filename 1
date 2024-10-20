@@ -1,0 +1,161 @@
+async function fetchData() {
+  try {
+    // Викликаємо асинхронну функцію і очікуємо її завершення
+    const response = await fetch('https://api.example.com/data');
+    
+    // Очікуємо на обробку JSON-даних
+    const data = await response.json();
+    
+    // Після завершення всіх промісів, обробляємо результат
+    console.log(data);
+  } catch (error) {
+    // Якщо виникла помилка, вона буде оброблена тут
+    console.error('Error fetching data:', error);
+  }
+}
+
+fetchData();
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using SpotifyAPI.Services;
+using Model.Entities;
+
+namespace SpotifyAPI.Controllers
+{
+    [Route("api/[controller]/[action]")]
+    [ApiController]
+    public class PlaylistsController : ControllerBase
+    {
+        private readonly PlaylistService _playlistService;
+
+        public PlaylistsController(PlaylistService playlistService)
+        {
+            _playlistService = playlistService;
+        }
+
+        // Отримати всі плейлисти користувача
+        [HttpGet("{userId}")]
+        public async Task<IActionResult> GetUserPlaylists(long userId)
+        {
+            var playlists = await _playlistService.GetUserPlaylistsAsync(userId);
+            return Ok(playlists);
+        }
+
+        // Створити новий плейлист
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> CreatePlaylist([FromForm] long userId, [FromForm] string playlistName, [FromForm] string imageUrl, [FromForm] IEnumerable<long> trackIds)
+        {
+            var playlist = await _playlistService.CreatePlaylistAsync(userId, playlistName, imageUrl, trackIds);
+            return Ok(playlist);
+        }
+
+        // Додати трек до плейлиста
+        [HttpPost("{playlistId}/tracks/{trackId}")]
+        [Authorize]
+        public async Task<IActionResult> AddTrackToPlaylist(long playlistId, long trackId)
+        {
+            await _playlistService.AddTrackToPlaylistAsync(playlistId, trackId);
+            return Ok();
+        }
+
+        // Видалити трек з плейлиста
+        [HttpDelete("{playlistId}/tracks/{trackId}")]
+        [Authorize]
+        public async Task<IActionResult> RemoveTrackFromPlaylist(long playlistId, long trackId)
+        {
+            await _playlistService.RemoveTrackFromPlaylistAsync(playlistId, trackId);
+            return Ok();
+        }
+    }
+}
+using Microsoft.EntityFrameworkCore;
+using Model.Context;
+using Model.Entities;
+
+namespace SpotifyAPI.Services
+{
+    public class PlaylistService
+    {
+        private readonly DataContext _context;
+
+        public PlaylistService(DataContext context)
+        {
+            _context = context;
+        }
+
+        // Створення нового плейлиста
+        public async Task<Playlist> CreatePlaylistAsync(long userId, string playlistName, string imageUrl, IEnumerable<long> trackIds)
+        {
+            var playlist = new Playlist
+            {
+                Name = playlistName,
+                Image = imageUrl,
+                UserId = userId,
+                Tracks = trackIds.Select(trackId => new PlaylistTrack { TrackId = trackId }).ToList()
+            };
+
+            _context.Playlists.Add(playlist);
+            await _context.SaveChangesAsync();
+            return playlist;
+        }
+
+        // Отримання всіх плейлистів користувача
+        public async Task<IEnumerable<Playlist>> GetUserPlaylistsAsync(long userId)
+        {
+            return await _context.Playlists
+                .Include(p => p.Tracks)
+                    .ThenInclude(pt => pt.Track)
+                .Where(p => p.UserId == userId)
+                .ToListAsync();
+        }
+
+        // Додавання треку до плейлиста
+        public async Task AddTrackToPlaylistAsync(long playlistId, long trackId)
+        {
+            var playlistTrack = new PlaylistTrack
+            {
+                PlaylistId = playlistId,
+                TrackId = trackId
+            };
+
+            _context.PlaylistTracks.Add(playlistTrack);
+            await _context.SaveChangesAsync();
+        }
+
+        // Видалення треку з плейлиста
+        public async Task RemoveTrackFromPlaylistAsync(long playlistId, long trackId)
+        {
+            var playlistTrack = await _context.PlaylistTracks
+                .FirstOrDefaultAsync(pt => pt.PlaylistId == playlistId && pt.TrackId == trackId);
+
+            if (playlistTrack != null)
+            {
+                _context.PlaylistTracks.Remove(playlistTrack);
+                await _context.SaveChangesAsync();
+            }
+        }
+    }
+}
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using Model.Entities;
+using Model.Entities.Identity;
+
+namespace Model.Context
+{
+    public class DataContext : IdentityDbContext<User, Role, long, UserClaim, UserRole, UserLogin, RoleClaim, UserToken>
+    {
+        public DataContext(DbContextOptions<DataContext> options) : base(options) {}
+
+        public DbSet<Album> Albums { get; set; }
+        public DbSet<Artist> Artists { get; set; }
+        public DbSet<Track> Tracks { get; set; }
+        public DbSet<Playlist> Playlists { get; set; }
+        public DbSet<PlaylistTrack> PlaylistTracks { get; set; }
+        public DbSet<Follower> Followers { get; set; }
+        public DbSet<Genre> Genres { get; set; }
+        public DbSet<Like> Likes { get; set; }
+        public DbSet<TrackGenre> TrackGenres { get; set; }
+    }
+}
