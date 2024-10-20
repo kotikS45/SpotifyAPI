@@ -1,0 +1,54 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using SpotifyAPI.Services;
+using Model.Entities;
+
+namespace SpotifyAPI.Controllers
+{
+    [Route("api/[controller]/[action]")]
+    [ApiController]
+    public class PlaylistsController : ControllerBase
+    {
+        private readonly PlaylistService _playlistService;
+
+        public PlaylistsController(PlaylistService playlistService)
+        {
+            _playlistService = playlistService;
+        }
+
+        // Отримати всі плейлисти користувача
+        [HttpGet("{userId}")]
+        public async Task<IActionResult> GetUserPlaylists(long userId)
+        {
+            var playlists = await _playlistService.GetUserPlaylistsAsync(userId);
+            return Ok(playlists);
+        }
+
+        // Створити новий плейлист
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> CreatePlaylist([FromForm] long userId, [FromForm] string playlistName, [FromForm] string imageUrl, [FromForm] IEnumerable<long> trackIds)
+        {
+            var playlist = await _playlistService.CreatePlaylistAsync(userId, playlistName, imageUrl, trackIds);
+            return Ok(playlist);
+        }
+
+        // Додати трек до плейлиста
+        [HttpPost("{playlistId}/tracks/{trackId}")]
+        [Authorize]
+        public async Task<IActionResult> AddTrackToPlaylist(long playlistId, long trackId)
+        {
+            await _playlistService.AddTrackToPlaylistAsync(playlistId, trackId);
+            return Ok();
+        }
+
+        // Видалити трек з плейлиста
+        [HttpDelete("{playlistId}/tracks/{trackId}")]
+        [Authorize]
+        public async Task<IActionResult> RemoveTrackFromPlaylist(long playlistId, long trackId)
+        {
+            await _playlistService.RemoveTrackFromPlaylistAsync(playlistId, trackId);
+            return Ok();
+        }
+    }
+}
