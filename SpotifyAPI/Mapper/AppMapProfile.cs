@@ -25,7 +25,9 @@ public class AppMapProfile : Profile
         CreateMap<AlbumCreateVm, Album>()
             .ForMember(c => c.Image, opt => opt.Ignore());
 
-        CreateMap<Track, TrackVm>();
+        CreateMap<Track, TrackVm>()
+            .ForMember(c => c.ArtistId, opt => opt.MapFrom(src => src.Album.ArtistId))
+            .ForMember(c => c.ArtistName, opt => opt.MapFrom(src => src.Album.Artist.Name));
         CreateMap<TrackCreateVm, Track>()
             .ForMember(c => c.Path, opt => opt.Ignore())
             .ForMember(C => C.Duration, opt => opt.Ignore())

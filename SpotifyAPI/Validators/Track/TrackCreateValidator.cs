@@ -1,12 +1,13 @@
 ﻿using FluentValidation;
 using SpotifyAPI.Models.Track;
+using SpotifyAPI.Services;
 using SpotifyAPI.Services.Interfaces;
 
 namespace SpotifyAPI.Validators.Track;
 
 public class TrackCreateValidator : AbstractValidator<TrackCreateVm>
 {
-    public TrackCreateValidator(IAudioValidator audioValidator, IExistingEntityCheckerService existingEntityCheckerService)
+    public TrackCreateValidator(IImageValidator imageValidator, IAudioValidator audioValidator, IExistingEntityCheckerService existingEntityCheckerService)
     {
         RuleFor(a => a.Name)
             .NotEmpty()
@@ -31,5 +32,11 @@ public class TrackCreateValidator : AbstractValidator<TrackCreateVm>
         RuleFor(a => a.Genres)
             .Must(t => t.Count > 0)
                 .WithMessage("The track must have at least one genre");
+
+        RuleFor(c => c.Image)
+            .NotNull()
+                .WithMessage("Image is not selected")
+            .MustAsync(imageValidator.IsValidImageAsync)
+                .WithMessage("Image is not valid");
     }
 }

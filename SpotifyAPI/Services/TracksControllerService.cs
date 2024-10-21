@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
+using MailKit;
 using Microsoft.EntityFrameworkCore;
 using Model.Context;
 using Model.Entities;
+using SpotifyAPI.Models.Playlist;
 using SpotifyAPI.Models.Track;
 using SpotifyAPI.Services.Interfaces;
 
@@ -10,7 +12,8 @@ namespace SpotifyAPI.Services;
 public class TracksControllerService(
     DataContext context,
     IMapper mapper,
-    IAudioService audioService) : ITrackControllerService
+    IAudioService audioService,
+    IImageService imageService) : ITrackControllerService
 {
     public async Task CreateAsync(TrackCreateVm vm)
     {
@@ -18,8 +21,9 @@ public class TracksControllerService(
 
         track.Path = await audioService.SaveAudioAsync(vm.Audio);
         track.Duration = audioService.GetAudioDuration(track.Path);
+        track.Image = await imageService.SaveImageAsync(vm.Image);
 
-        context.Tracks.Add(track);
+        await context.Tracks.AddAsync(track);
 
         try
         {
@@ -38,6 +42,7 @@ public class TracksControllerService(
         }
         catch (Exception)
         {
+            imageService.DeleteImageIfExists(track.Image);
             audioService.DeleteAudio(track.Path);
             throw;
         }
@@ -48,9 +53,11 @@ public class TracksControllerService(
         var track = await context.Tracks.FirstAsync(t => t.Id == vm.Id);
 
         string oldAudio = track.Path;
+        string oldImage = track.Image;
 
         track.Name = vm.Name;
         track.Path = await audioService.SaveAudioAsync(vm.Audio);
+        track.Image = await imageService.SaveImageAsync(vm.Image);
         track.Duration = audioService.GetAudioDuration(track.Path);
         track.AlbumId = vm.AlbumId;
 
@@ -71,10 +78,13 @@ public class TracksControllerService(
             await context.SaveChangesAsync();
 
             audioService.DeleteAudioIfExists(oldAudio);
+
+            imageService.DeleteImageIfExists(oldImage);
         }
         catch (Exception)
         {
             audioService.DeleteAudioIfExists(track.Path);
+            imageService.DeleteImageIfExists(track.Image);
             throw;
         }
     }
@@ -90,5 +100,6 @@ public class TracksControllerService(
         await context.SaveChangesAsync();
 
         audioService.DeleteAudioIfExists(track.Path);
+        imageService.DeleteImageIfExists(track.Image);
     }
 }

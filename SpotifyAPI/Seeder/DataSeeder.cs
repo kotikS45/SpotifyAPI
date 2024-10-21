@@ -1,8 +1,10 @@
 ﻿using Bogus;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Model.Context;
 using Model.Entities;
 using Newtonsoft.Json;
+using SpotifyAPI.Configuration;
 using SpotifyAPI.Seeder.Interfaces;
 using SpotifyAPI.Services.Interfaces;
 
@@ -11,13 +13,17 @@ namespace SpotifyAPI.Seeder;
 public class DataSeeder(
     DataContext context,
     IImageService imageService,
-    IAudioService audioService
+    IAudioService audioService,
+    IOptions<ApiKeys> apiKeys
     ) : IDataSeeder
 {
-    string apiKey = "2d375f10";
+    private string apiKey = "";
 
     public async Task SeedAsync()
     {
+        if (apiKeys != null)
+            apiKey = apiKeys.Value.Jamendo;
+
         if (!await context.Genres.AnyAsync())
             await CreateGenresAsync();
 
@@ -36,19 +42,32 @@ public class DataSeeder(
 
     public async Task CreateGenresAsync()
     {
-        var genres = new List<Genre>
+        Faker faker = new Faker();
+        using var httpClient = new HttpClient();
+
+        var genres = new List<Genre>();
+        var genreNames = new List<string>
         {
-            new Genre { Name = "Rock" },
-            new Genre { Name = "Pop" },
-            new Genre { Name = "Jazz" },
-            new Genre { Name = "Classical" },
-            new Genre { Name = "Hip-Hop" },
-            new Genre { Name = "Electronic" },
-            new Genre { Name = "Country" },
-            new Genre { Name = "Reggae" },
-            new Genre { Name = "Blues" },
-            new Genre { Name = "Metal" }
+            "Rock", "Pop", "Jazz", "Blues", "Hip Hop", "Classical", "Country", "Reggae", "Electronic", "R&B", "Folk", "Soul",
+            "Funk", "Metal", "Punk", "Disco", "House", "Techno", "Dubstep", "Trance", "Ambient", "Grunge",
+            "Ska", "Latin", "Gospel", "Swing", "Bossa Nova", "K-Pop", "J-Pop", "Indie Rock",
+            "Alternative", "New Wave", "Trap", "Garage", "Dancehall", "Afrobeat", "Drum and Bass", "EDM", "Synthpop", "Hardcore", "Opera"
         };
+
+
+        foreach (var genreName in genreNames)
+        {
+            var imageUrl = faker.Image.LoremFlickrUrl(keywords: genreName);
+            var base64 = await GetImageAsBase64Async(httpClient, imageUrl);
+
+            var genre = new Genre
+            {
+                Name = genreName,
+                Image = await imageService.SaveImageAsync(base64)
+            };
+
+            genres.Add(genre);
+        }
 
         await context.Genres.AddRangeAsync(genres);
         await context.SaveChangesAsync();
@@ -62,7 +81,7 @@ public class DataSeeder(
         var artists = new List<Artist>();
         for (int i = 0; i < 5; i++)
         {
-            var imageUrl = faker.Internet.Avatar();
+            var imageUrl = faker.Image.LoremFlickrUrl();
             var base64 = await GetImageAsBase64Async(httpClient, imageUrl);
 
             var artist = new Artist
@@ -126,19 +145,23 @@ public class DataSeeder(
         {
             int count = faker.Random.Int(1, 10);
 
-            List<string> urls = await GetTrackUrlsAsync(count);
+            IList<string> urls = await GetTrackUrlsAsync(count);
 
             for (int i = 0; i < count; i++)
             {
                 var audioBytes = await httpClient.GetByteArrayAsync(urls[i]);
                 var audioPath = await audioService.SaveAudioAsync(audioBytes);
 
+                var imageUrl = faker.Image.LoremFlickrUrl(keywords: "album");
+                var base64 = await GetImageAsBase64Async(httpClient, imageUrl);
+
                 var track = new Track
                 {
                     Name = faker.Lorem.Sentence(),
-                    Path = await audioService.SaveAudioAsync(audioBytes),
+                    Path = audioPath,
                     Duration = audioService.GetAudioDuration(audioPath),
-                    AlbumId = album.Id
+                    AlbumId = album.Id,
+                    Image = await imageService.SaveImageAsync(base64)
                 };
                 int genreCount = faker.Random.Int(1, 3);
                 var selectedGenres = faker.PickRandom(genres, genreCount).ToList();
@@ -287,7 +310,8 @@ public class DataSeeder(
             likes.Add(new Like
             {
                 TrackId = item.Id,
-                UserId = (await context.Users.FirstAsync(x => x.UserName == "admin")).Id
+                UserId = (await context.Users.FirstAsync(x => x.UserName == "admin")).Id,
+                LikeDateTime = DateTime.Now
             });
         }
 

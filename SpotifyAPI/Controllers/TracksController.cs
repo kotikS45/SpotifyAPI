@@ -32,8 +32,12 @@ public class TracksController(
                 Name = t.Name,
                 Duration = t.Duration,
                 AlbumId = t.AlbumId,
+                ArtistId = t.Album.ArtistId,
+                AlbumName = t.Album.Name,
+                ArtistName = t.Album.Artist.Name,
                 Path = t.Path,
-                Genres = t.Genres.Select(g => new GenreVm { Id = g.Genre.Id, Name = g.Genre.Name })
+                Genres = t.Genres.Select(g => new GenreVm { Id = g.Genre.Id, Name = g.Genre.Name, Image = g.Genre.Image }),
+                Image = t.Image
             })
             .ToArrayAsync();
 
@@ -65,6 +69,9 @@ public class TracksController(
                 Name = t.Name,
                 Duration = t.Duration,
                 AlbumId = t.AlbumId,
+                ArtistId = t.Album.ArtistId,
+                AlbumName = t.Album.Name,
+                ArtistName = t.Album.Artist.Name,
                 Path = t.Path,
                 Genres = t.Genres.Select(g => new GenreVm { Id = g.Genre.Id, Name = g.Genre.Name }).ToList()
             })

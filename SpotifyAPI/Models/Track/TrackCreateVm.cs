@@ -6,4 +6,5 @@ public class TrackCreateVm
     public string Name { get; set; } = null!;
     public IFormFile Audio { get; set; } = null!;
     public ICollection<long> Genres { get; set; } = null!;
+    public IFormFile Image { get; set; } = null!;
 }
