@@ -281,6 +281,6 @@ yarn-error.log*
 
 package-lock.json
 
-SpotifyAPI/Data
-SpotifyAPI/appsettings.json
-SpotifyAPI/appsettings.Development.json
+/SpotifyAPI/Data
+/SpotifyAPI/appsettings.json
+/SpotifyAPI/appsettings.Development.json
