@@ -1,0 +1,15 @@
+Added 'Song 1' by Artist 1 to playlist 'My Favorite Songs'.
+Added 'Song 2' by Artist 2 to playlist 'My Favorite Songs'.
+Added 'Song 3' by Artist 3 to playlist 'My Favorite Songs'.
+
+Playlist: My Favorite Songs
+Track: Song 1, Artist: Artist 1, Duration: 4:0
+Track: Song 2, Artist: Artist 2, Duration: 3:30
+Track: Song 3, Artist: Artist 3, Duration: 3:0
+Total tracks: 3
+Removed 'Song 2' by Artist 2 from playlist 'My Favorite Songs'.
+
+Playlist: My Favorite Songs
+Track: Song 1, Artist: Artist 1, Duration: 4:0
+Track: Song 3, Artist: Artist 3, Duration: 3:0
+Total tracks: 2
