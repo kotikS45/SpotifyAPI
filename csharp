@@ -1,0 +1,27 @@
+public class Program
+{
+    public static void Main()
+    {
+        // Створюємо список відтворення
+        Playlist myPlaylist = new Playlist { Name = "My Favorite Songs" };
+
+        // Створюємо кілька треків
+        Track track1 = new Track { Id = 1, Name = "Song 1", Artist = "Artist 1", Duration = 240 };
+        Track track2 = new Track { Id = 2, Name = "Song 2", Artist = "Artist 2", Duration = 210 };
+        Track track3 = new Track { Id = 3, Name = "Song 3", Artist = "Artist 3", Duration = 180 };
+
+        // Додаємо треки до списку
+        myPlaylist.AddTrack(track1);
+        myPlaylist.AddTrack(track2);
+        myPlaylist.AddTrack(track3);
+
+        // Виведення списку відтворення
+        myPlaylist.DisplayPlaylist();
+
+        // Видаляємо трек
+        myPlaylist.RemoveTrack(track2);
+
+        // Виведення списку відтворення після видалення трека
+        myPlaylist.DisplayPlaylist();
+    }
+}
