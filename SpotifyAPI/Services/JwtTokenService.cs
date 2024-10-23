@@ -43,6 +43,9 @@ public class JwtTokenService(
         string userEmail = user.Email
             ?? throw new NullReferenceException("User.Email");
 
+        string userName = user.UserName
+            ?? throw new NullReferenceException("User.UserName");
+
         var userRoles = await userManager.GetRolesAsync(user);
 
         var roleClaims = userRoles
@@ -52,7 +55,9 @@ public class JwtTokenService(
         var claims = new List<Claim>
         {
             new Claim("id", user.Id.ToString()),
-            new Claim("email", userEmail)
+            new Claim("email", userEmail),
+            new Claim("image", user.Photo),
+            new Claim("username", user.UserName)
         };
 
         if (!string.IsNullOrEmpty(user.Name))
