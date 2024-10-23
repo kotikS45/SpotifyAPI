@@ -1,0 +1,66 @@
+// Модель для запису прослуховувань
+public class ListeningHistory
+{
+    public Track Track { get; set; }
+    public DateTime LastListened { get; set; }
+    public int ListenCount { get; set; }
+}
+
+// Розширення користувача з історією прослуховувань
+public class UserWithHistory : User
+{
+    public List<ListeningHistory> ListeningHistory { get; set; } = new List<ListeningHistory>();
+
+    // Метод для запису прослуховування треку
+    public void ListenToTrack(Track track)
+    {
+        var history = ListeningHistory.FirstOrDefault(h => h.Track.Id == track.Id);
+        if (history != null)
+        {
+            history.LastListened = DateTime.Now;
+            history.ListenCount++;
+        }
+        else
+        {
+            ListeningHistory.Add(new ListeningHistory
+            {
+                Track = track,
+                LastListened = DateTime.Now,
+                ListenCount = 1
+            });
+        }
+        Console.WriteLine($"You listened to '{track.Name}' by {track.Artist}.");
+    }
+
+    // Метод для отримання останніх прослуховувань
+    public void DisplayListeningHistory()
+    {
+        if (ListeningHistory.Count == 0)
+        {
+            Console.WriteLine("No listening history available.");
+            return;
+        }
+
+        Console.WriteLine("\nListening History:");
+        foreach (var history in ListeningHistory.OrderByDescending(h => h.LastListened))
+        {
+            Console.WriteLine($"{history.Track.Name} by {history.Track.Artist} - Last listened: {history.LastListened}, Count: {history.ListenCount}");
+        }
+    }
+}
+
+// Сервіс рекомендацій треків з врахуванням прослуховувань
+public class AdvancedMusicRecommendationService : MusicRecommendationService
+{
+    // Отримання рекомендацій на основі історії прослуховувань
+    public List<Track> RecommendTracksBasedOnHistory(UserWithHistory user)
+    {
+        var favoriteGenres = user.FavoriteGenres;
+        var recommendedTracks = AvailableTracks
+            .Where(t => favoriteGenres.Contains(t.Genre))
+            .OrderByDescending(t => user.ListeningHistory.Count(h => h.Track.Genre == t.Genre))
+            .ToList();
+
+        return recommendedTracks;
+    }
+}
