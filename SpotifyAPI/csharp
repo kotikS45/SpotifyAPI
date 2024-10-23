@@ -1,0 +1,41 @@
+// Клас для користувача
+public class User
+{
+    public string Name { get; set; } = null!;
+    public string Email { get; set; } = null!;
+    public List<string> FavoriteGenres { get; set; } = new List<string>();
+    public List<Playlist> Playlists { get; set; } = new List<Playlist>();
+
+    // Додавання плейлисту
+    public void AddPlaylist(Playlist playlist)
+    {
+        Playlists.Add(playlist);
+        Console.WriteLine($"Playlist '{playlist.Name}' created for {Name}.");
+    }
+
+    // Виведення плейлистів
+    public void DisplayPlaylists()
+    {
+        Console.WriteLine($"\nUser: {Name}, Email: {Email}");
+        if (Playlists.Count == 0)
+        {
+            Console.WriteLine("No playlists available.");
+            return;
+        }
+        
+        foreach (var playlist in Playlists)
+        {
+            playlist.DisplayPlaylist();
+        }
+    }
+
+    // Показати улюблені жанри
+    public void DisplayFavoriteGenres()
+    {
+        Console.WriteLine($"\n{ Name}'s Favorite Genres:");
+        foreach (var genre in FavoriteGenres)
+        {
+            Console.WriteLine($"- {genre}");
+        }
+    }
+}
