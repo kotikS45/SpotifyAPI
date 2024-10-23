@@ -1,0 +1,44 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+// Клас для трека
+public class Track
+{
+    public long Id { get; set; }
+    public string Name { get; set; } = null!;
+    public string Artist { get; set; } = null!;
+    public string Genre { get; set; } = null!;
+    public int Duration { get; set; } // Тривалість у секундах
+
+    // Виведення інформації про трек
+    public void DisplayTrackInfo()
+    {
+        Console.WriteLine($"Track: {Name}, Artist: {Artist}, Genre: {Genre}, Duration: {Duration / 60}:{Duration % 60:D2}");
+    }
+}
+
+// Клас для списку відтворення (плейлист)
+public class Playlist
+{
+    public string Name { get; set; } = null!;
+    public List<Track> Tracks { get; set; } = new List<Track>();
+
+    // Додавання трека до списку
+    public void AddTrack(Track track)
+    {
+        Tracks.Add(track);
+        Console.WriteLine($"Added '{track.Name}' by {track.Artist} to playlist '{Name}'.");
+    }
+
+    // Виведення треків у списку
+    public void DisplayPlaylist()
+    {
+        Console.WriteLine($"\nPlaylist: {Name}");
+        foreach (var track in Tracks)
+        {
+            track.DisplayTrackInfo();
+        }
+        Console.WriteLine($"Total tracks: {Tracks.Count}");
+    }
+}
