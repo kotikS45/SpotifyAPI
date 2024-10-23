@@ -1,0 +1,141 @@
+public class Program
+{
+    static UserManager userManager = new UserManager();
+    static UserWithHistory? loggedInUser;
+
+    public static void Main()
+    {
+        while (true)
+        {
+            Console.WriteLine("\n--- Main Menu ---");
+            Console.WriteLine("1. Register");
+            Console.WriteLine("2. Login");
+            Console.WriteLine("3. Exit");
+            Console.Write("Choose an option: ");
+            string option = Console.ReadLine();
+
+            switch (option)
+            {
+                case "1":
+                    Register();
+                    break;
+                case "2":
+                    Login();
+                    break;
+                case "3":
+                    Console.WriteLine("Goodbye!");
+                    return;
+            }
+        }
+    }
+
+    static void Register()
+    {
+        Console.Write("Enter your name: ");
+        string name = Console.ReadLine();
+        Console.Write("Enter your email: ");
+        string email = Console.ReadLine();
+        Console.Write("Enter your password: ");
+        string password = Console.ReadLine();
+
+        userManager.Register(name, email, password);
+    }
+
+    static void Login()
+    {
+        Console.Write("Enter your email: ");
+        string email = Console.ReadLine();
+        Console.Write("Enter your password: ");
+        string password = Console.ReadLine();
+
+        var user = userManager.Login(email, password);
+        if (user != null)
+        {
+            loggedInUser = new UserWithHistory
+            {
+                Name = user.Name,
+                Email = user.Email,
+                FavoriteGenres = user.FavoriteGenres,
+                Playlists = user.Playlists
+            };
+            UserMenu();
+        }
+    }
+
+    static void UserMenu()
+    {
+        while (true)
+        {
+            Console.WriteLine($"\n--- {loggedInUser.Name}'s Menu ---");
+            Console.WriteLine("1. View Playlists");
+            Console.WriteLine("2. Listen to a Track");
+            Console.WriteLine("3. View Listening History");
+            Console.WriteLine("4. Get Recommendations");
+            Console.WriteLine("5. Logout");
+            Console.Write("Choose an option: ");
+            string option = Console.ReadLine();
+
+            switch (option)
+            {
+                case "1":
+                    loggedInUser.DisplayPlaylists();
+                    break;
+                case "2":
+                    ListenToTrack();
+                    break;
+                case "3":
+                    loggedInUser.DisplayListeningHistory();
+                    break;
+                case "4":
+                    GetRecommendations();
+                    break;
+                case "5":
+                    Console.WriteLine("Logging out...");
+                    return;
+            }
+        }
+    }
+
+    static void ListenToTrack()
+    {
+        // Створимо кілька треків для демонстрації
+        Track track1 = new Track { Id = 1, Name = "Song A", Artist = "Artist 1", Genre = "Pop", Duration = 240 };
+        Track track2 = new Track { Id = 2, Name = "Song B", Artist = "Artist 2", Genre = "Rock", Duration = 210 };
+
+        Console.WriteLine("Available tracks: 1. Song A, 2. Song B");
+        Console.Write("Choose a track to listen: ");
+        string choice = Console.ReadLine();
+
+        switch (choice)
+        {
+            case "1":
+                loggedInUser.ListenToTrack(track1);
+                break;
+            case "2":
+                loggedInUser.ListenToTrack(track2);
+                break;
+            default:
+                Console.WriteLine("Invalid choice.");
+                break;
+        }
+    }
+
+    static void GetRecommendations()
+    {
+        var recommendationService = new AdvancedMusicRecommendationService();
+        var recommendations = recommendationService.RecommendTracksBasedOnHistory(loggedInUser);
+
+        if (recommendations.Count > 0)
+        {
+            Console.WriteLine("\nRecommended tracks:");
+            foreach (var track in recommendations)
+            {
+                track.DisplayTrackInfo();
+            }
+        }
+        else
+        {
+            Console.WriteLine("No recommendations found.");
+        }
+    }
+}
