@@ -1,31 +1,34 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using Microsoft.EntityFrameworkCore;
 using Model.Context;
 using Model.Entities;
 using SpotifyAPI.Models.Like;
 using SpotifyAPI.Models.Track;
+using SpotifyAPI.Services.Interfaces;
 
 namespace SpotifyAPI.Services.Pagination;
 
 public class LikePaginationService(
     DataContext context,
+    IScopedIdentityService identityService,
     IMapper mapper
-    ) : PaginationService<Track, TrackVm, LikeFilterVm>(mapper)
+    ) : PaginationService<Like, TrackVm, LikeFilterVm>(mapper)
 {
-    protected override IQueryable<Track> GetQuery() => context.Tracks.OrderBy(c => c.Id);
+    protected override IQueryable<Like> GetQuery() => context.Likes;
 
-    protected override IQueryable<Track> FilterQuery(IQueryable<Track> query, LikeFilterVm paginationVm)
+    protected override IQueryable<Like> FilterQuery(IQueryable<Like> query, LikeFilterVm paginationVm)
     {
-        var user = context.Users.First(x => x.UserName == paginationVm.Username);
-
-        var likedTracksIds = context.Likes
-            .Where(f => f.UserId == user.Id)
-            .Select(f => f.TrackId);
-
-        query = query.Where(a => likedTracksIds.Contains(a.Id));
-
-        if (paginationVm.Name is not null)
-            query = query.Where(c => c.Name.ToLower().Contains(paginationVm.Name.ToLower()));
+        query = query.Where(l => l.UserId == identityService.GetRequiredUser().Id);
 
         return query;
+    }
+
+    protected override async Task<IEnumerable<TrackVm>> MapAsync(IQueryable<Like> query)
+    {
+        return await query
+            .Select(l => l.Track)
+            .ProjectTo<TrackVm>(mapper.ConfigurationProvider)
+            .ToArrayAsync();
     }
 }
