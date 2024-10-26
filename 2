@@ -1,0 +1,27 @@
+using System;
+using System.Collections.Concurrent;
+using System.Threading.Tasks;
+
+public class Program
+{
+    public static async Task Main()
+    {
+        ConcurrentQueue<string> queue = new ConcurrentQueue<string>();
+
+        // Додавання елементів у чергу з різних потоків
+        Parallel.For(0, 10, i =>
+        {
+            queue.Enqueue($"Task {i}");
+        });
+
+        // Асинхронна обробка елементів черги
+        while (!queue.IsEmpty)
+        {
+            if (queue.TryDequeue(out string? result))
+            {
+                Console.WriteLine($"Processing: {result}");
+                await Task.Delay(100); // Імітація обробки
+            }
+        }
+    }
+}
