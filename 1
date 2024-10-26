@@ -1,0 +1,9 @@
+try
+{
+    Queue<string> queue = new Queue<string>();
+    Console.WriteLine(queue.Dequeue());
+}
+catch (InvalidOperationException ex)
+{
+    Console.WriteLine("Queue is empty. Cannot dequeue.");
+}
