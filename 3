@@ -1,0 +1,22 @@
+public class Customer
+{
+    public string Name { get; set; }
+    public int Id { get; set; }
+}
+
+public class Program
+{
+    public static void Main()
+    {
+        Queue<Customer> customerQueue = new Queue<Customer>();
+
+        customerQueue.Enqueue(new Customer { Name = "John Doe", Id = 1 });
+        customerQueue.Enqueue(new Customer { Name = "Jane Smith", Id = 2 });
+
+        while (customerQueue.Count > 0)
+        {
+            Customer current = customerQueue.Dequeue();
+            Console.WriteLine($"Serving customer {current.Name} with ID: {current.Id}");
+        }
+    }
+}
