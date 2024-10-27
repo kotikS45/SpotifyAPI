@@ -1,0 +1,25 @@
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+[Route("api/[controller]")]
+[ApiController]
+public class SyncController : ControllerBase
+{
+    // Уявний репозиторій треків
+    private readonly List<Track> _tracks = new List<Track>
+    {
+        new Track { Id = 1, Name = "Song A", Artist = "Artist 1", Genre = "Pop", UpdatedAt = DateTime.UtcNow.AddDays(-5) },
+        new Track { Id = 2, Name = "Song B", Artist = "Artist 2", Genre = "Rock", UpdatedAt = DateTime.UtcNow.AddDays(-2) },
+        new Track { Id = 3, Name = "Song C", Artist = "Artist 3", Genre = "Jazz", UpdatedAt = DateTime.UtcNow.AddDays(-1) },
+    };
+
+    // Ендпоінт для отримання нових або змінених треків з певної дати
+    [HttpGet("updated-tracks")]
+    public IActionResult GetUpdatedTracks([FromQuery] DateTime lastSyncTime)
+    {
+        var updatedTracks = _tracks.Where(t => t.UpdatedAt > lastSyncTime).ToList();
+        return Ok(updatedTracks);
+    }
+}
