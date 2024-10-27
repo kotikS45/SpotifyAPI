@@ -1,0 +1,71 @@
+using Microsoft.AspNetCore.Mvc;
+using System.IO;
+using System.Threading.Tasks;
+
+[Route("api/[controller]")]
+[ApiController]
+public class TracksController : ControllerBase
+{
+    private readonly string _tracksFolder;
+
+    public TracksController(IWebHostEnvironment env)
+    {
+        // Директорія для зберігання треків
+        _tracksFolder = Path.Combine(env.ContentRootPath, "Tracks");
+
+        // Створення директорії, якщо вона ще не існує
+        if (!Directory.Exists(_tracksFolder))
+        {
+            Directory.CreateDirectory(_tracksFolder);
+        }
+    }
+
+    // Метод для завантаження трека на сервер
+    [HttpPost("upload")]
+    public async Task<IActionResult> UploadTrack([FromForm] IFormFile file, [FromForm] string name, [FromForm] string artist)
+    {
+        if (file == null || file.Length == 0)
+            return BadRequest("Invalid file.");
+
+        var filePath = Path.Combine(_tracksFolder, file.FileName);
+
+        // Зберігаємо файл на сервері
+        using (var stream = new FileStream(filePath, FileMode.Create))
+        {
+            await file.CopyToAsync(stream);
+        }
+
+        // Збереження інформації про трек (тут можна зберегти в базу даних)
+        var track = new Track
+        {
+            Name = name,
+            Artist = artist,
+            Genre = "Pop", // Можна зробити параметром
+            FilePath = filePath
+        };
+
+        // Збереження у базу даних тут
+
+        return Ok(new { track.Name, track.Artist, track.FilePath });
+    }
+
+    // Метод для отримання трека для завантаження
+    [HttpGet("download/{fileName}")]
+    public async Task<IActionResult> DownloadTrack(string fileName)
+    {
+        var filePath = Path.Combine(_tracksFolder, fileName);
+
+        if (!System.IO.File.Exists(filePath))
+            return NotFound("File not found.");
+
+        var memory = new MemoryStream();
+        using (var stream = new FileStream(filePath, FileMode.Open))
+        {
+            await stream.CopyToAsync(memory);
+        }
+        memory.Position = 0;
+
+        // Відправляємо файл на завантаження
+        return File(memory, "audio/mpeg", Path.GetFileName(filePath));
+    }
+}
