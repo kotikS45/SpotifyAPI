@@ -1,0 +1,5 @@
+POST /api/tracks/upload
+Form Data:
+  - file: (виберіть аудіо-файл)
+  - name: "Track Name"
+  - artist: "Artist Name"
