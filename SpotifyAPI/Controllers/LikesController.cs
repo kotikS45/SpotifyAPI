@@ -16,22 +16,22 @@ namespace SpotifyAPI.Controllers;
 public class LikesController(
     DataContext context,
     IMapper mapper,
-    IIdentityService identityService,
+    IScopedIdentityService identityService,
     ILikeControllerService service,
     IValidator<LikeVm> validator,
     IPaginationService<TrackVm, LikeFilterVm> pagination) : ControllerBase
 {
     [HttpGet]
     [Authorize(Roles = "Admin,User")]
-    public async Task<IActionResult> GetAll([FromQuery] string username)
+    public async Task<IActionResult> GetAll()
     {
-        var user = await context.Users.FirstOrDefaultAsync(x => x.UserName == username);
+        await identityService.InitCurrentUserAsync(this);
 
-        if (user == null)
+        if (identityService.User == null)
             return NotFound();
 
         var artists = await context.Likes
-            .Where(x => x.UserId == user.Id)
+            .Where(x => x.UserId == identityService.User.Id)
             .Select(x => x.Track)
             .ProjectTo<TrackVm>(mapper.ConfigurationProvider)
             .ToArrayAsync();
@@ -45,9 +45,9 @@ public class LikesController(
     {
         try
         {
-            var user = await context.Users.FirstOrDefaultAsync(x => x.UserName == vm.Username);
+            await identityService.InitCurrentUserAsync(this);
 
-            if (user == null)
+            if (identityService.User == null)
                 return NotFound();
 
             return Ok(await pagination.GetPageAsync(vm));
@@ -67,8 +67,12 @@ public class LikesController(
         if (!validationResult.IsValid)
             return BadRequest(validationResult.Errors);
 
-        var user = await identityService.GetCurrentUserAsync(this);
-        await service.Like(user.Id, vm);
+        await identityService.InitCurrentUserAsync(this);
+
+        if (identityService.User == null)
+            return NotFound();
+
+        await service.Like(identityService.User.Id, vm);
         return Ok();
     }
 
@@ -81,8 +85,13 @@ public class LikesController(
         if (!validationResult.IsValid)
             return BadRequest(validationResult.Errors);
 
-        var user = await identityService.GetCurrentUserAsync(this);
-        await service.Unlike(user.Id, vm);
+
+        await identityService.InitCurrentUserAsync(this);
+
+        if (identityService.User == null)
+            return NotFound();
+
+        await service.Unlike(identityService.User.Id, vm);
         return Ok();
     }
 }
