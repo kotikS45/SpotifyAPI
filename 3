@@ -1,0 +1,31 @@
+using System.Collections.Generic;
+using System.Linq;
+
+public class MusicRecommendationService
+{
+    private List<Track> AvailableTracks = new List<Track>();
+
+    // Ініціалізація доступних треків для рекомендацій
+    public MusicRecommendationService()
+    {
+        AvailableTracks.Add(new Track { Id = 1, Name = "Song A", Artist = "Artist 1", Genre = "Pop", Album = "Album X", Duration = 240 });
+        AvailableTracks.Add(new Track { Id = 2, Name = "Song B", Artist = "Artist 2", Genre = "Rock", Album = "Album Y", Duration = 300 });
+        AvailableTracks.Add(new Track { Id = 3, Name = "Song C", Artist = "Artist 3", Genre = "Jazz", Album = "Album Z", Duration = 180 });
+        AvailableTracks.Add(new Track { Id = 4, Name = "Song D", Artist = "Artist 1", Genre = "Pop", Album = "Album X", Duration = 210 });
+    }
+
+    // Метод для рекомендацій треків
+    public List<Track> RecommendTracks(User user)
+    {
+        Console.WriteLine($"\nRecommending tracks for {user.Name} based on favorite genres and listening history...");
+
+        var popularGenres = user.GetPopularGenres();
+        var recommendedTracks = AvailableTracks
+            .Where(track => popularGenres.Contains(track.Genre))
+            .OrderByDescending(track => user.History.Count(h => h.Track.Genre == track.Genre))
+            .Take(5)
+            .ToList();
+
+        return recommendedTracks;
+    }
+}
