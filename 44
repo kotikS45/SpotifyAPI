@@ -1,0 +1,15 @@
+function getStoredTracks() {
+    const tracks = JSON.parse(localStorage.getItem(TRACKS_KEY)) || [];
+    return tracks;
+}
+
+// Відображення всіх збережених треків
+function displayTracks() {
+    const tracks = getStoredTracks();
+    tracks.forEach(track => {
+        console.log(`Track: ${track.Name}, Artist: ${track.Artist}, Genre: ${track.Genre}`);
+    });
+}
+
+// Викликаємо відображення треків
+displayTracks();
