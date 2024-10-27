@@ -1,0 +1,33 @@
+public class Program
+{
+    public static void Main()
+    {
+        // Створюємо користувача
+        User user = new User { Name = "John Doe", Email = "john.doe@example.com" };
+        user.FavoriteGenres.Add("Pop");
+        user.FavoriteGenres.Add("Rock");
+
+        // Створюємо сервіс рекомендацій
+        MusicRecommendationService recommendationService = new MusicRecommendationService();
+
+        // Створимо кілька треків для демонстрації
+        Track track1 = new Track { Id = 1, Name = "Song A", Artist = "Artist 1", Genre = "Pop", Album = "Album X", Duration = 240 };
+        Track track2 = new Track { Id = 2, Name = "Song B", Artist = "Artist 2", Genre = "Rock", Album = "Album Y", Duration = 210 };
+        Track track3 = new Track { Id = 3, Name = "Song C", Artist = "Artist 3", Genre = "Jazz", Album = "Album Z", Duration = 180 };
+
+        // Слухаємо треки
+        user.ListenToTrack(track1);
+        user.ListenToTrack(track2);
+        user.ListenToTrack(track1); // Слухаємо повторно, щоб підвищити популярність
+
+        // Отримуємо рекомендації для користувача
+        var recommendedTracks = recommendationService.RecommendTracks(user);
+
+        // Виведення рекомендованих треків
+        Console.WriteLine("\nRecommended tracks:");
+        foreach (var track in recommendedTracks)
+        {
+            track.DisplayTrackInfo();
+        }
+    }
+}
