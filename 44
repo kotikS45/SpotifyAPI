@@ -1,0 +1,44 @@
+// Ключ для зберігання останньої дати синхронізації
+const LAST_SYNC_KEY = "lastSyncTime";
+const TRACKS_KEY = "tracks";
+
+// Отримуємо останній час синхронізації або встановлюємо початкове значення
+function getLastSyncTime() {
+    return localStorage.getItem(LAST_SYNC_KEY) || new Date(0).toISOString();
+}
+
+// Оновлюємо час останньої синхронізації
+function updateLastSyncTime(date) {
+    localStorage.setItem(LAST_SYNC_KEY, date.toISOString());
+}
+
+// Зберігання треків у локальному сховищі
+function saveTracks(tracks) {
+    const storedTracks = JSON.parse(localStorage.getItem(TRACKS_KEY)) || [];
+    const updatedTracks = [...storedTracks, ...tracks];
+    localStorage.setItem(TRACKS_KEY, JSON.stringify(updatedTracks));
+}
+
+// Синхронізація з сервером
+async function syncTracks() {
+    const lastSyncTime = getLastSyncTime();
+    const response = await fetch(`http://localhost:5000/api/sync/updated-tracks?lastSyncTime=${lastSyncTime}`);
+    
+    if (response.ok) {
+        const updatedTracks = await response.json();
+        
+        // Зберігаємо нові або оновлені треки локально
+        saveTracks(updatedTracks);
+        
+        // Оновлюємо час останньої синхронізації
+        const currentSyncTime = new Date();
+        updateLastSyncTime(currentSyncTime);
+
+        console.log("Синхронізовано треки:", updatedTracks);
+    } else {
+        console.error("Не вдалося синхронізувати треки:", response.statusText);
+    }
+}
+
+// Викликаємо синхронізацію
+syncTracks();
