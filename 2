@@ -1,0 +1,41 @@
+public class ListeningHistory
+{
+    public Track Track { get; set; }
+    public DateTime LastListened { get; set; }
+    public int ListenCount { get; set; } // Кількість прослуховувань трека
+}
+
+public class User
+{
+    public string Name { get; set; } = null!;
+    public string Email { get; set; } = null!;
+    public List<string> FavoriteGenres { get; set; } = new List<string>();
+    public List<ListeningHistory> History { get; set; } = new List<ListeningHistory>();
+
+    // Запис прослуховування трека
+    public void ListenToTrack(Track track)
+    {
+        var historyItem = History.FirstOrDefault(h => h.Track.Id == track.Id);
+        if (historyItem != null)
+        {
+            historyItem.LastListened = DateTime.Now;
+            historyItem.ListenCount++;
+        }
+        else
+        {
+            History.Add(new ListeningHistory { Track = track, LastListened = DateTime.Now, ListenCount = 1 });
+        }
+        Console.WriteLine($"You listened to '{track.Name}' by {track.Artist}.");
+    }
+
+    // Метод для отримання популярних жанрів на основі прослуховувань
+    public IEnumerable<string> GetPopularGenres()
+    {
+        var genreCount = History.GroupBy(h => h.Track.Genre)
+                                .Select(g => new { Genre = g.Key, Count = g.Sum(h => h.ListenCount) })
+                                .OrderByDescending(g => g.Count)
+                                .Take(3)
+                                .Select(g => g.Genre);
+        return genreCount;
+    }
+}
