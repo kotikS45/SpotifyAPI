@@ -1,0 +1,16 @@
+using System;
+
+public class Track
+{
+    public long Id { get; set; }  // Унікальний ідентифікатор трека
+    public string Name { get; set; } = null!;
+    public string Artist { get; set; } = null!;
+    public string Genre { get; set; } = null!;
+    public string Album { get; set; } = null!;
+    public int Duration { get; set; }  // Тривалість у секундах
+
+    public void DisplayTrackInfo()
+    {
+        Console.WriteLine($"Track: {Name}, Artist: {Artist}, Genre: {Genre}, Album: {Album}, Duration: {Duration / 60}:{Duration % 60:D2}");
+    }
+}
