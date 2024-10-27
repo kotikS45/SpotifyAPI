@@ -1,0 +1,17 @@
+// Завантаження треку з сервера
+async function downloadTrack(fileName) {
+  const response = await fetch(`http://localhost:5000/api/tracks/download/${fileName}`);
+  if (!response.ok) throw new Error('Network response was not ok');
+
+  const blob = await response.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.style.display = 'none';
+  a.href = url;
+  a.download = fileName;
+
+  document.body.appendChild(a);
+  a.click();
+
+  window.URL.revokeObjectURL(url);
+}
