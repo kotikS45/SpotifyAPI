@@ -1,0 +1,20 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+// Клас для моделювання трека
+public class Track
+{
+    public long Id { get; set; }
+    public string Name { get; set; } = null!;
+    public string Artist { get; set; } = null!;
+    public string Genre { get; set; } = null!;
+    public string Album { get; set; } = null!;
+    public int Duration { get; set; } // Тривалість у секундах
+
+    // Виведення інформації про трек
+    public void DisplayTrackInfo()
+    {
+        Console.WriteLine($"Track: {Name}, Artist: {Artist}, Genre: {Genre}, Album: {Album}, Duration: {Duration / 60}:{Duration % 60:D2}");
+    }
+}
