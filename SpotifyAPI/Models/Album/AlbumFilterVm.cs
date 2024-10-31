@@ -6,4 +6,5 @@ public class AlbumFilterVm : PaginationVm
 {
     public string? Name { get; set; }
     public long? ArtistId { get; set; }
+    public bool? isRandom { get; set; }
 }

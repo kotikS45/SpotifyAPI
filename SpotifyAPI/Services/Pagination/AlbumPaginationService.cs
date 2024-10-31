@@ -14,6 +14,15 @@ public class AlbumPaginationService(
 
     protected override IQueryable<Album> FilterQuery(IQueryable<Album> query, AlbumFilterVm paginationVm)
     {
+        if (paginationVm.isRandom == true)
+        {
+            query = query.OrderBy(c => Guid.NewGuid());
+        }
+        else
+        {
+            query = query.OrderBy(c => c.Id);
+        }
+
         if (paginationVm.Name is not null)
             query = query.Where(c => c.Name.ToLower().Contains(paginationVm.Name.ToLower()));
 
