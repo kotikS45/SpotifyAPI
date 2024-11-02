@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Model.Context;
 using Model.Entities.Identity;
 using SpotifyAPI.Constants;
@@ -111,4 +112,52 @@ public class AccountsControllerService(
 
         await emailService.SendAsync(message);
     }
+
+    public async Task UpdateAsync(UserUpdateVm vm, User user)
+    {
+        if (!string.IsNullOrEmpty(vm.Username) && vm.Username != user.UserName)
+        {
+            try
+            {
+                var existingUser = await context.Users
+                    .FirstOrDefaultAsync(u => u.UserName == vm.Username);
+
+                if (existingUser == null)
+                {
+                    user.UserName = vm.Username;
+
+                    context.Users.Update(user);
+                    await context.SaveChangesAsync();
+                }
+                else
+                {
+                    throw new Exception("Username is already taken.");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"An error occurred while updating username: {ex.Message}");
+            }
+        }
+
+        if (vm.Image != null)
+        {
+            string oldImage = user.Photo;
+            user.Photo = await imageService.SaveImageAsync(vm.Image);
+
+            try
+            {
+                var result = await userManager.UpdateAsync(user);
+
+                imageService.DeleteImageIfExists(oldImage);
+            }
+            catch (Exception)
+            {
+                imageService.DeleteImageIfExists(user.Photo);
+                throw;
+            }
+        }
+
+    }
+
 }
