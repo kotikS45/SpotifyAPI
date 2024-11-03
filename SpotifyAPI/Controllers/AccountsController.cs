@@ -1,4 +1,6 @@
-﻿using FluentValidation;
+﻿using AutoMapper;
+using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Model.Entities.Identity;
@@ -6,7 +8,6 @@ using SpotifyAPI.Exceptions;
 using SpotifyAPI.Models.Errors;
 using SpotifyAPI.Models.Identity;
 using SpotifyAPI.Services.Interfaces;
-using SpotifyAPI.SMTP;
 
 namespace SpotifyAPI.Controllers;
 
@@ -14,10 +15,26 @@ namespace SpotifyAPI.Controllers;
 [ApiController]
 public class AccountsController(
     UserManager<User> userManager,
+    IMapper mapper,
     IJwtTokenService jwtTokenService,
     IValidator<RegisterVm> registerValidator,
-    IAccountsControllerService service) : ControllerBase
+    IValidator<UserUpdateVm> updateValidator,
+    IAccountsControllerService service,
+    IScopedIdentityService identityService) : ControllerBase
 {
+    [HttpGet]
+    [Authorize(Roles = "Admin,User")]
+    public async Task<IActionResult> GetInfo()
+    {
+        await identityService.InitCurrentUserAsync(this);
+
+        if (identityService.User == null)
+            return NotFound();
+
+        var result = mapper.Map<UserVm>(identityService.User);
+
+        return Ok(result);
+    }
 
     [HttpPost]
     public async Task<IActionResult> Login([FromForm] LoginVm model)
@@ -82,5 +99,26 @@ public class AccountsController(
         {
             return StatusCode(500, new ErrorResponse { Message = e.Message, StatusCode = 500 });
         }
+    }
+
+    [HttpPut]
+    [Authorize(Roles = "Admin,User")]
+    public async Task<IActionResult> Update([FromForm] UserUpdateVm vm)
+    {
+        var validationResult = await updateValidator.ValidateAsync(vm);
+
+        if (!validationResult.IsValid)
+        {
+            return BadRequest(validationResult.Errors);
+        }
+
+        await identityService.InitCurrentUserAsync(this);
+
+        if (identityService.User == null)
+            return NotFound();
+
+        await service.UpdateAsync(vm, identityService.User);
+
+        return Ok();
     }
 }

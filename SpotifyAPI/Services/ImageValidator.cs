@@ -5,8 +5,11 @@ namespace SpotifyAPI.Services;
 
 public class ImageValidator : IImageValidator
 {
-    public async Task<bool> IsValidImageAsync(IFormFile image, CancellationToken cancellationToken)
+    public async Task<bool> IsValidImageAsync(IFormFile? image, CancellationToken cancellationToken)
     {
+        if (image == null)
+            return false;
+
         using var stream = image.OpenReadStream();
 
         try
