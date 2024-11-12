@@ -59,7 +59,7 @@ public class ArtistsController(
     }
 
     [HttpPost]
-    [Authorize(Roles = "Admin")]
+    //[Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create([FromForm] ArtistCreateVm vm)
     {
         var validationResult = await createValidator.ValidateAsync(vm);
