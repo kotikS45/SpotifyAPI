@@ -1,0 +1,7 @@
+if (!string.IsNullOrEmpty(filter.SortBy))
+{
+    query = filter.SortBy switch
+    {
+        "Name" => filter.SortDescending ? query.OrderByDescending(t => t.Name) : query.OrderBy(t => t.Name),
+        "Artist" => filter.SortDescending ? query.OrderByDescending(t => t.Artist) : query.OrderBy(t => t.Artist),
+        "ReleaseYear" => filter.SortDescending ? query.OrderByDescending
