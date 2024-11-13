@@ -8,6 +8,7 @@ public class TrackVm
     public int Duration { get; set; }
     public long AlbumId { get; set; }
     public long ArtistId { get; set; }
+    public bool IsLiked { get; set; }
     public string Name { get; set; } = null!;
     public string Path { get; set; } = null!;
     public string Image { get; set; } = null!;

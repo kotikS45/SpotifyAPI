@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Model.Context;
 using Model.Entities;
 using Model.Entities.Identity;
 using SpotifyAPI.Models.Album;
@@ -29,7 +30,9 @@ public class AppMapProfile : Profile
 
         CreateMap<Track, TrackVm>()
             .ForMember(c => c.ArtistId, opt => opt.MapFrom(src => src.Album.ArtistId))
-            .ForMember(c => c.ArtistName, opt => opt.MapFrom(src => src.Album.Artist.Name));
+            .ForMember(c => c.ArtistName, opt => opt.MapFrom(src => src.Album.Artist.Name))
+            .ForMember(dest => dest.IsLiked, opt => opt.Ignore());
+
         CreateMap<TrackCreateVm, Track>()
             .ForMember(c => c.Path, opt => opt.Ignore())
             .ForMember(C => C.Duration, opt => opt.Ignore())

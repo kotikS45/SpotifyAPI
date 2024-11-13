@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Model.Context;
 using SpotifyAPI.Models.Genre;
 using SpotifyAPI.Models.Track;
+using SpotifyAPI.Services;
 using SpotifyAPI.Services.Interfaces;
 
 namespace SpotifyAPI.Controllers;
@@ -13,6 +14,7 @@ namespace SpotifyAPI.Controllers;
 [ApiController]
 public class TracksController(
     DataContext context,
+    IScopedIdentityService identityService,
     IValidator<TrackCreateVm> createValidator,
     IValidator<TrackUpdateVm> updateValidator,
     ITrackControllerService service,
@@ -23,6 +25,16 @@ public class TracksController(
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
+        await identityService.InitCurrentUserAsync(this);
+
+        var userId = identityService.User?.Id;
+        var likedTrackIds = userId != null
+            ? await context.Likes
+                .Where(l => l.UserId == userId)
+                .Select(l => l.TrackId)
+                .ToListAsync()
+            : new List<long>();
+
         var tracks = await context.Tracks
             .Include(t => t.Genres)
                 .ThenInclude(tg => tg.Genre)
@@ -35,6 +47,7 @@ public class TracksController(
                 ArtistId = t.Album.ArtistId,
                 AlbumName = t.Album.Name,
                 ArtistName = t.Album.Artist.Name,
+                IsLiked = likedTrackIds.Contains(t.Id),
                 Path = t.Path,
                 Genres = t.Genres.Select(g => new GenreVm { Id = g.Genre.Id, Name = g.Genre.Name, Image = g.Genre.Image }),
                 Image = t.Image
@@ -49,7 +62,24 @@ public class TracksController(
     {
         try
         {
-            return Ok(await pagination.GetPageAsync(vm));
+            await identityService.InitCurrentUserAsync(this);
+
+            var userId = identityService.User?.Id;
+            var likedTrackIds = userId != null
+                ? await context.Likes
+                    .Where(l => l.UserId == userId)
+                    .Select(l => l.TrackId)
+                    .ToListAsync()
+                : new List<long>();
+
+            var tracks = await pagination.GetPageAsync(vm);
+
+            foreach (var track in tracks.Data)
+            {
+                track.IsLiked = likedTrackIds.Contains(track.Id);
+            }
+
+            return Ok(tracks);
         }
         catch (Exception ex)
         {
@@ -57,9 +87,16 @@ public class TracksController(
         }
     }
 
+
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(long id)
     {
+        await identityService.InitCurrentUserAsync(this);
+
+        var userId = identityService.User?.Id;
+        var isLiked = userId != null && await context.Likes
+            .AnyAsync(l => l.UserId == userId && l.TrackId == id);
+
         var track = await context.Tracks
             .Include(t => t.Genres)
             .ThenInclude(tg => tg.Genre)
@@ -73,7 +110,8 @@ public class TracksController(
                 AlbumName = t.Album.Name,
                 ArtistName = t.Album.Artist.Name,
                 Path = t.Path,
-                Genres = t.Genres.Select(g => new GenreVm { Id = g.Genre.Id, Name = g.Genre.Name }).ToList()
+                Genres = t.Genres.Select(g => new GenreVm { Id = g.Genre.Id, Name = g.Genre.Name }).ToList(),
+                IsLiked = isLiked
             })
             .FirstOrDefaultAsync(c => c.Id == id);
 
@@ -82,6 +120,7 @@ public class TracksController(
 
         return Ok(track);
     }
+
 
     [HttpPost]
     [Authorize(Roles = "Admin")]

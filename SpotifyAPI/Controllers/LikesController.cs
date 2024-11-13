@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -32,8 +31,19 @@ public class LikesController(
 
         var artists = await context.Likes
             .Where(x => x.UserId == identityService.User.Id)
-            .Select(x => x.Track)
-            .ProjectTo<TrackVm>(mapper.ConfigurationProvider)
+            .Select(x => new TrackVm
+            {
+                Id = x.Track.Id,
+                Duration = x.Track.Duration,
+                AlbumId = x.Track.AlbumId,
+                ArtistId = x.Track.Album.ArtistId,
+                IsLiked = context.Likes.Any(l => l.UserId == identityService.User.Id && l.TrackId == x.TrackId),
+                Name = x.Track.Name,
+                Path = x.Track.Path,
+                Image = x.Track.Image,
+                AlbumName = x.Track.Album.Name,
+                ArtistName = x.Track.Album.Artist.Name
+            })
             .ToArrayAsync();
 
         return Ok(artists);
@@ -50,7 +60,15 @@ public class LikesController(
             if (identityService.User == null)
                 return NotFound();
 
-            return Ok(await pagination.GetPageAsync(vm));
+            var pageResult = await pagination.GetPageAsync(vm);
+
+            foreach (var track in pageResult.Data)
+            {
+                track.IsLiked = await context.Likes
+                    .AnyAsync(l => l.UserId == identityService.User.Id && l.TrackId == track.Id);
+            }
+
+            return Ok(pageResult);
         }
         catch (Exception ex)
         {
@@ -58,40 +76,39 @@ public class LikesController(
         }
     }
 
-    [HttpPost]
+    [HttpPost("{trackId}")]
     [Authorize(Roles = "Admin,User")]
-    public async Task<IActionResult> Like([FromForm] LikeVm vm)
+    public async Task<IActionResult> Like(long trackId)
     {
-        var validationResult = await validator.ValidateAsync(vm);
-
-        if (!validationResult.IsValid)
-            return BadRequest(validationResult.Errors);
-
         await identityService.InitCurrentUserAsync(this);
 
         if (identityService.User == null)
             return NotFound();
 
-        await service.Like(identityService.User.Id, vm);
+        var track = await context.Tracks.FindAsync(trackId);
+        if (track == null)
+            return NotFound("Track not found");
+
+        await service.Like(identityService.User.Id, trackId);
+
         return Ok();
     }
 
-    [HttpDelete]
+    [HttpDelete("{trackId}")]
     [Authorize(Roles = "Admin,User")]
-    public async Task<IActionResult> Unlike([FromForm] LikeVm vm)
+    public async Task<IActionResult> Unlike(long trackId)
     {
-        var validationResult = await validator.ValidateAsync(vm);
-
-        if (!validationResult.IsValid)
-            return BadRequest(validationResult.Errors);
-
-
         await identityService.InitCurrentUserAsync(this);
 
         if (identityService.User == null)
             return NotFound();
 
-        await service.Unlike(identityService.User.Id, vm);
+        var track = await context.Tracks.FindAsync(trackId);
+        if (track == null)
+            return NotFound("Track not found");
+
+        await service.Unlike(identityService.User.Id, trackId);
+
         return Ok();
     }
 }
