@@ -9,22 +9,22 @@ namespace SpotifyAPI.Services;
 public class FollowerControllerService(
     DataContext context) : IFollowerControllerService
 {
-    public async Task Follow(long userId, FollowerVm vm)
+    public async Task Follow(long userId, long artistId)
     {
         bool alreadyFollowing = await context.Followers
-            .AnyAsync(f => f.UserId == userId && f.ArtistId == vm.ArtistId);
+            .AnyAsync(f => f.UserId == userId && f.ArtistId == artistId);
 
         if (alreadyFollowing)
             return;
 
-        await context.Followers.AddAsync(new Follower { UserId = userId, ArtistId = vm.ArtistId });
+        await context.Followers.AddAsync(new Follower { UserId = userId, ArtistId = artistId });
         await context.SaveChangesAsync();
     }
 
-    public async Task Unfollow(long userId, FollowerVm vm)
+    public async Task Unfollow(long userId, long artistId)
     {
         var follower = await context.Followers
-            .FirstOrDefaultAsync(f => f.UserId == userId && f.ArtistId == vm.ArtistId);
+            .FirstOrDefaultAsync(f => f.UserId == userId && f.ArtistId == artistId);
 
         if (follower is null)
             return;

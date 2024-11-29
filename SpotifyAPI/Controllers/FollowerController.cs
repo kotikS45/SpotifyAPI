@@ -81,31 +81,29 @@ public class FollowerController (
         }
     }
 
-    [HttpPost]
+    [HttpPost("{artistId}")]
     [Authorize(Roles = "Admin,User")]
-    public async Task<IActionResult> Follow([FromForm] FollowerVm vm)
+    public async Task<IActionResult> Follow(long artistId)
     {
-        var validationResult = await validator.ValidateAsync(vm);
-
-        if (!validationResult.IsValid)
-            return BadRequest(validationResult.Errors);
+        var artist = await context.Artists.FindAsync(artistId);
+        if (artist == null)
+            return NotFound("Artist not found");
 
         var user = await identityService.GetCurrentUserAsync(this);
-        await service.Follow(user.Id, vm);
+        await service.Follow(user.Id, artistId);
         return Ok();
     }
 
-    [HttpDelete]
+    [HttpDelete("{artistId}")]
     [Authorize(Roles = "Admin,User")]
-    public async Task<IActionResult> Unfollow([FromForm] FollowerVm vm)
+    public async Task<IActionResult> Unfollow(long artistId)
     {
-        var validationResult = await validator.ValidateAsync(vm);
-
-        if (!validationResult.IsValid)
-            return BadRequest(validationResult.Errors);
+        var artist = await context.Artists.FindAsync(artistId);
+        if (artist == null)
+            return NotFound("Artist not found");
 
         var user = await identityService.GetCurrentUserAsync(this);
-        await service.Unfollow(user.Id, vm);
+        await service.Unfollow(user.Id, artistId);
         return Ok();
     }
 }
