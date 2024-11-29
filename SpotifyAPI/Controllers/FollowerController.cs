@@ -16,6 +16,7 @@ namespace SpotifyAPI.Controllers;
 public class FollowerController (
     DataContext context,
     IMapper mapper,
+    IScopedIdentityService scopedIdentityService,
     IIdentityService identityService,
     IFollowerControllerService service,
     IValidator<FollowerVm> validator,
@@ -23,9 +24,14 @@ public class FollowerController (
 {
     [HttpGet]
     [Authorize(Roles = "Admin,User")]
-    public async Task<IActionResult> GetAll([FromQuery] string username)
+    public async Task<IActionResult> GetAll()
     {
-        var user = await context.Users.FirstOrDefaultAsync(x => x.UserName == username);
+        await scopedIdentityService.InitCurrentUserAsync(this);
+
+        if (scopedIdentityService.User == null)
+            return NotFound();
+
+        var user = await context.Users.FirstOrDefaultAsync(x => x.UserName == scopedIdentityService.User.UserName);
 
         if (user == null)
             return NotFound();
@@ -36,6 +42,11 @@ public class FollowerController (
             .ProjectTo<ArtistVm>(mapper.ConfigurationProvider)
             .ToArrayAsync();
 
+        foreach (var artist in artists)
+        {
+            artist.IsFollowed = context.Followers.Where(x => x.ArtistId == artist.Id && x.UserId == user.Id).FirstOrDefault() != null;
+        }
+
         return Ok(artists);
     }
 
@@ -45,12 +56,24 @@ public class FollowerController (
     {
         try
         {
-            var user = await context.Users.FirstOrDefaultAsync(x => x.UserName == vm.Username);
+            await scopedIdentityService.InitCurrentUserAsync(this);
+
+            if (scopedIdentityService.User == null)
+                return NotFound();
+
+            var user = await context.Users.FirstOrDefaultAsync(x => x.UserName == scopedIdentityService.User.UserName);
 
             if (user == null)
                 return NotFound();
 
-            return Ok(await pagination.GetPageAsync(vm));
+            var page = await pagination.GetPageAsync(vm);
+
+            foreach (var artist in page.Data)
+            {
+                artist.IsFollowed = context.Followers.Where(x => x.ArtistId == artist.Id && x.UserId == user.Id).FirstOrDefault() != null;
+            }
+
+            return Ok(page);
         }
         catch (Exception ex)
         {
@@ -58,31 +81,29 @@ public class FollowerController (
         }
     }
 
-    [HttpPost]
+    [HttpPost("{artistId}")]
     [Authorize(Roles = "Admin,User")]
-    public async Task<IActionResult> Follow([FromForm] FollowerVm vm)
+    public async Task<IActionResult> Follow(long artistId)
     {
-        var validationResult = await validator.ValidateAsync(vm);
-
-        if (!validationResult.IsValid)
-            return BadRequest(validationResult.Errors);
+        var artist = await context.Artists.FindAsync(artistId);
+        if (artist == null)
+            return NotFound("Artist not found");
 
         var user = await identityService.GetCurrentUserAsync(this);
-        await service.Follow(user.Id, vm);
+        await service.Follow(user.Id, artistId);
         return Ok();
     }
 
-    [HttpDelete]
+    [HttpDelete("{artistId}")]
     [Authorize(Roles = "Admin,User")]
-    public async Task<IActionResult> Unfollow([FromForm] FollowerVm vm)
+    public async Task<IActionResult> Unfollow(long artistId)
     {
-        var validationResult = await validator.ValidateAsync(vm);
-
-        if (!validationResult.IsValid)
-            return BadRequest(validationResult.Errors);
+        var artist = await context.Artists.FindAsync(artistId);
+        if (artist == null)
+            return NotFound("Artist not found");
 
         var user = await identityService.GetCurrentUserAsync(this);
-        await service.Unfollow(user.Id, vm);
+        await service.Unfollow(user.Id, artistId);
         return Ok();
     }
 }

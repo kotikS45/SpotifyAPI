@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -35,14 +34,31 @@ public class PlaylistTracksController(
         if (playlist.UserId != user.Id)
             return Forbid("The playlist is not own");
 
-        var tracks = await context.PlaylistTracks
+        var trackIds = await context.PlaylistTracks
             .Where(pt => pt.PlaylistId == id)
-            .Select(pt => pt.Track)
-            .ProjectTo<TrackVm>(mapper.ConfigurationProvider)
+            .Select(pt => pt.TrackId)
+            .ToListAsync();
+
+        var tracks = await context.Tracks
+            .Where(t => trackIds.Contains(t.Id))
+            .Select(t => new TrackVm
+            {
+                Id = t.Id,
+                Name = t.Name,
+                Duration = t.Duration,
+                AlbumId = t.AlbumId,
+                ArtistId = t.Album.ArtistId,
+                AlbumName = t.Album.Name,
+                ArtistName = t.Album.Artist.Name,
+                Path = t.Path,
+                Image = t.Image,
+                IsLiked = context.Likes.Any(l => l.UserId == user.Id && l.TrackId == t.Id)
+            })
             .ToArrayAsync();
 
         return Ok(tracks);
     }
+
 
     [HttpGet]
     [Authorize(Roles = "Admin,User")]
@@ -57,15 +73,17 @@ public class PlaylistTracksController(
         if (playlist.UserId != user.Id)
             return Forbid("The playlist is not own");
 
-        try
+        var pageResult = await pagination.GetPageAsync(vm);
+
+        foreach (var track in pageResult.Data)
         {
-            return Ok(await pagination.GetPageAsync(vm));
+            track.IsLiked = await context.Likes
+                .AnyAsync(l => l.UserId == user.Id && l.TrackId == track.Id);
         }
-        catch (Exception ex)
-        {
-            return BadRequest(ex.Message);
-        }
+
+        return Ok(pageResult);
     }
+
 
     [HttpPost]
     [Authorize(Roles = "Admin,User")]

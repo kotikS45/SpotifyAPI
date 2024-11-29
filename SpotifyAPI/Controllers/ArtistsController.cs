@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Model.Context;
 using SpotifyAPI.Models.Pagination;
 using Microsoft.AspNetCore.Authorization;
+using SpotifyAPI.Services;
 
 namespace SpotifyAPI.Controllers;
 
@@ -16,6 +17,7 @@ namespace SpotifyAPI.Controllers;
 public class ArtistsController(
     DataContext context,
     IMapper mapper,
+    IScopedIdentityService identityService,
     IValidator<ArtistCreateVm> createValidator,
     IValidator<ArtistUpdateVm> updateValidator,
     IArtistsControllerService service,
@@ -25,9 +27,18 @@ public class ArtistsController(
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
+        await identityService.InitCurrentUserAsync(this);
+
+        var userId = identityService.User?.Id;
+
         var artists = await context.Artists
             .ProjectTo<ArtistVm>(mapper.ConfigurationProvider)
             .ToArrayAsync();
+
+        foreach ( var artist in artists )
+        {
+            artist.IsFollowed = context.Followers.Where(x => x.ArtistId == artist.Id && x.UserId == userId).FirstOrDefault() != null;
+        }
 
         return Ok(artists);
     }
@@ -37,7 +48,18 @@ public class ArtistsController(
     {
         try
         {
-            return Ok(await pagination.GetPageAsync(vm));
+            await identityService.InitCurrentUserAsync(this);
+
+            var userId = identityService.User?.Id;
+
+            var page = await pagination.GetPageAsync(vm);
+
+            foreach (var artist in page.Data)
+            {
+                artist.IsFollowed = context.Followers.Where(x => x.ArtistId == artist.Id && x.UserId == userId).FirstOrDefault() != null;
+            }
+
+            return Ok(page);
         }
         catch (Exception ex)
         {
@@ -48,14 +70,20 @@ public class ArtistsController(
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(long id)
     {
-        var artists = await context.Artists
+        await identityService.InitCurrentUserAsync(this);
+
+        var userId = identityService.User?.Id;
+
+        var artist = await context.Artists
             .ProjectTo<ArtistVm>(mapper.ConfigurationProvider)
             .FirstOrDefaultAsync(c => c.Id == id);
 
-        if (artists is null)
+        if (artist is null)
             return NotFound();
 
-        return Ok(artists);
+        artist.IsFollowed = context.Followers.Where(x => x.ArtistId == artist.Id && x.UserId == userId).FirstOrDefault() != null;
+
+        return Ok(artist);
     }
 
     [HttpPost]
