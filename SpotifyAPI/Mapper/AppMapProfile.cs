@@ -21,7 +21,8 @@ public class AppMapProfile : Profile
         CreateMap<Artist, ArtistVm>()
             .ForMember(dest => dest.AlbumsCount, opt => opt.MapFrom(src => src.Albums.Count))
             .ForMember(dest => dest.TracksCount, opt => opt.MapFrom(src => src.Albums.SelectMany(a => a.Tracks).Count()))
-            .ForMember(dest => dest.Followers, opt => opt.MapFrom(src => src.Followers.Count()));
+            .ForMember(dest => dest.Followers, opt => opt.MapFrom(src => src.Followers.Count()))
+            .ForMember(dest => dest.IsFollowed, opt => opt.Ignore());
         CreateMap<ArtistCreateVm, Artist>()
             .ForMember(c => c.Image, opt => opt.Ignore());
 
