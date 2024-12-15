@@ -19,6 +19,11 @@ public class TrackPaginationService(
 
     protected override IQueryable<Track> FilterQuery(IQueryable<Track> query, TrackFilterVm paginationVm)
     {
+        if (paginationVm.GenreId is not null)
+        {
+            query = query.Where(x => x.Genres.Contains(new TrackGenre { TrackId = x.Id, GenreId = paginationVm.GenreId.Value }));
+        }
+
         if (paginationVm.isRandom == true)
         {
             query = query.OrderBy(c => Guid.NewGuid());

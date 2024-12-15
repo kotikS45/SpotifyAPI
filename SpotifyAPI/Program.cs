@@ -25,6 +25,7 @@ using SpotifyAPI.Services.Interfaces;
 using SpotifyAPI.Services.Pagination;
 using SpotifyAPI.SMTP;
 using SpotifyAPI.Configuration;
+using SpotifyAPI.Models.Search;
 
 var builder = WebApplication.CreateBuilder(args);
 
