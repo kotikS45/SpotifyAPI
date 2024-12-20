@@ -4,10 +4,14 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Model.Entities.Identity;
+using SpotifyAPI.Constants;
 using SpotifyAPI.Exceptions;
 using SpotifyAPI.Models.Errors;
 using SpotifyAPI.Models.Identity;
+using Google.Apis.Auth;
 using SpotifyAPI.Services.Interfaces;
+using static Google.Apis.Auth.GoogleJsonWebSignature;
+using Model.Context;
 
 namespace SpotifyAPI.Controllers;
 
@@ -15,11 +19,14 @@ namespace SpotifyAPI.Controllers;
 [ApiController]
 public class AccountsController(
     UserManager<User> userManager,
+    DataContext context,
     IMapper mapper,
     IJwtTokenService jwtTokenService,
     IValidator<RegisterVm> registerValidator,
     IValidator<UserUpdateVm> updateValidator,
     IAccountsControllerService service,
+    IConfiguration configuration,
+    IImageService imageService,
     IScopedIdentityService identityService) : ControllerBase
 {
     [HttpGet]
@@ -120,5 +127,79 @@ public class AccountsController(
         await service.UpdateAsync(vm, identityService.User);
 
         return Ok();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> GoogleLogin([FromForm] GoogleLoginVm model)
+    {
+        Payload payload;
+        try
+        {
+            payload = await ValidateAsync(
+                model.Credential,
+                new ValidationSettings
+                {
+                    Audience = [configuration["Authentication:Google:ClientId"]]
+                }
+            );
+        }
+        catch (InvalidJwtException e)
+        {
+            return Unauthorized(e.Message);
+        }
+
+
+        var user = await userManager.FindByEmailAsync(payload.Email);
+
+        if (user is null)
+        {
+            using var httpClient = new HttpClient();
+
+            user = new User
+            {
+                Name = payload.GivenName,
+                Email = payload.Email,
+                UserName = payload.Email,
+                Photo = await imageService.SaveImageAsync(await httpClient.GetByteArrayAsync(payload.Picture))
+            };
+
+            using var transaction = await context.Database.BeginTransactionAsync();
+
+            try
+            {
+                IdentityResult identityResult = await userManager.CreateAsync(user);
+                if (!identityResult.Succeeded)
+                {
+                    await transaction.RollbackAsync();
+                    imageService.DeleteImageIfExists(user.Photo);
+
+                    return StatusCode(500, identityResult.Errors);
+                }
+
+                identityResult = await userManager.AddToRoleAsync(user, Roles.User);
+
+                if (!identityResult.Succeeded)
+                {
+                    await transaction.RollbackAsync();
+                    imageService.DeleteImageIfExists(user.Photo);
+
+                    return StatusCode(500, "Role assignment error");
+                }
+
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                imageService.DeleteImageIfExists(user.Photo);
+            }
+
+            await userManager.AddToRoleAsync(user, Roles.User);
+        }
+
+        return Ok(new JwtTokenResponse
+        {
+            Token = await jwtTokenService.CreateTokenAsync(user)
+        });
     }
 }

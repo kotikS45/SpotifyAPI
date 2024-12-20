@@ -19,6 +19,7 @@ public class PlaylistsController(
     IValidator<PlaylistUpdateVm> updateValidator,
     IPlaylistControllerService service,
     IIdentityService identityService,
+    IScopedIdentityService scopedIdentityService,
     IPaginationService<PlaylistVm, PlaylistFilterVm> pagination
     ) : ControllerBase
 {
@@ -39,6 +40,11 @@ public class PlaylistsController(
     {
         try
         {
+            await scopedIdentityService.InitCurrentUserAsync(this);
+
+            if (scopedIdentityService.User == null)
+                return NotFound();
+
             return Ok(await pagination.GetPageAsync(vm));
         }
         catch (Exception ex)
