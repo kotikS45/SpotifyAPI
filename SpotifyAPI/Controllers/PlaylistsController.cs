@@ -74,7 +74,7 @@ public class PlaylistsController(
     [Authorize(Roles = "Admin,User")]
     public async Task<IActionResult> Create([FromForm] PlaylistCreateVm vm)
     {
-        var validationResult = await createValidator.ValidateAsync(vm);
+                var validationResult = await createValidator.ValidateAsync(vm);
 
         if (!validationResult.IsValid)
             return BadRequest(validationResult.Errors);
