@@ -1,17 +1,19 @@
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build-env
-WORKDIR /app
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
 
-COPY *.csproj ./
+COPY *.sln ./
+COPY SpotifyAPI/*.csproj ./SpotifyAPI/
+COPY Model/*csproj ./Model/
+
 RUN dotnet restore
 
-COPY . ./
-RUN dotnet publish -c Release -o out
+COPY . .
+RUN dotnet publish -o /app
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
-COPY --from=build-env /app/out .
+COPY --from=build /app .
 
-EXPOSE 80
-EXPOSE 443
+COPY SpotifyAPI/Data /app/Data
 
 ENTRYPOINT ["dotnet", "SpotifyAPI.dll"]
