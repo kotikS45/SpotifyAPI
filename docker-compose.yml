@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  web:
+    container_name: spotify_api_container
+    image: spotify_api
+    restart: on-failure
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5158:8080"
+    volumes:
+      - "./SpotifyAPI/Data:/app/Data"
+    depends_on:
+      - postgres
+
+  postgres:
+    container_name: postgres_container
+    image: postgres
+    restart: on-failure
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123456
+    volumes:
+      - ./volumes/db:/var/lib/postgresql/data

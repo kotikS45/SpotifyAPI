@@ -1,6 +1,4 @@
-﻿using NAudio.Wave;
-
-namespace SpotifyAPI.Services.Interfaces;
+﻿namespace SpotifyAPI.Services.Interfaces;
 
 public interface IAudioService
 {

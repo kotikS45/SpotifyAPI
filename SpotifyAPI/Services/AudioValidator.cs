@@ -1,5 +1,4 @@
-﻿using NAudio.Wave;
-using SpotifyAPI.Services.Interfaces;
+﻿using SpotifyAPI.Services.Interfaces;
 
 namespace SpotifyAPI.Services;
 
@@ -7,18 +6,26 @@ public class AudioValidator : IAudioValidator
 {
     public bool IsValidAudio(IFormFile audio)
     {
-        using var stream = audio.OpenReadStream();
-
+        string tempFile = Path.GetTempFileName();
         try
         {
-            using var mp3Reader = new Mp3FileReader(stream);
-            var waveFormat = mp3Reader.WaveFormat;
+            using (var stream = audio.OpenReadStream())
+            using (var fileStream = new FileStream(tempFile, FileMode.Create, FileAccess.Write))
+            {
+                stream.CopyTo(fileStream);
+            }
 
-            return waveFormat != null;
+            var tfile = TagLib.File.Create(tempFile);
+            return tfile.Properties.Duration.TotalSeconds > 0;
         }
         catch
         {
             return false;
+        }
+        finally
+        {
+            if (File.Exists(tempFile))
+                File.Delete(tempFile);
         }
     }
 

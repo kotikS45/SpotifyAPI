@@ -1,6 +1,4 @@
-﻿using Model.Entities;
-using NAudio.Wave;
-using SpotifyAPI.Services.Interfaces;
+﻿using SpotifyAPI.Services.Interfaces;
 
 namespace SpotifyAPI.Services;
 
@@ -104,9 +102,10 @@ public class AudioService(
             DeleteAudioIfExists(audio);
     }
 
-    public int GetAudioDuration(string name)
+    public int GetAudioDuration(string fileName)
     {
-        using var reader = new Mp3FileReader(Path.Combine(AudioDir, name));
-        return (int)reader.TotalTime.TotalSeconds;
+        string filePath = Path.Combine(AudioDir, fileName);
+        var tfile = TagLib.File.Create(filePath);
+        return (int)tfile.Properties.Duration.TotalSeconds;
     }
 }
